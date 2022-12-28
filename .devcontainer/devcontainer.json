@@ -7,7 +7,7 @@
   "updateContentCommand": "pip install -r requirements.txt && python manage.py migrate",
   "postCreateCommand": "",
   "postAttachCommand": {
-    "server": "python manage.py runserver"
+    "server": "python manage.py runsslserver 8443"
   },
   "customizations": {
     "codespaces": {
@@ -24,10 +24,10 @@
     }
   },
   "portsAttributes": {
-    "8000": {
+    "8443": {
       "label": "Application",
       "onAutoForward": "openPreview"
     }
   },
-  "forwardPorts": [8000]
+  "forwardPorts": [8443]
 }
