@@ -1,4 +1,5 @@
 import uuid
+from typing import List
 
 from django.db import models
 
@@ -49,6 +50,16 @@ class Person(models.Model):
             c.lower() for c in Country.objects.values_list("name", flat=True)
         }
         person_clean(self, country_names)
+
+    def eligible(self) -> List[str]:
+        """
+        Query across Parent and GrandParent relations for all eligibilities.
+        """
+        countries = {self.birthplace, self.residency}
+        countries |= set(self.parent_set.values_list("birthplace", flat=True))
+        for p in self.parent_set.all():
+            countries |= set(p.grandparent_set.values_list("birthplace", flat=True))
+        return sorted(countries)
 
 
 class Player(Person):

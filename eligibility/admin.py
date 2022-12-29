@@ -37,7 +37,7 @@ class ParentAdmin(nested_admin.NestedModelAdmin):
 
 @admin.register(Player)
 class PlayerAdmin(nested_admin.NestedModelAdmin):
-    list_display = ("name", "date_of_birth", "country_of_birth")
+    list_display = ("name", "date_of_birth", "country_of_birth", "eligible")
     inlines = [
         ParentInline,
     ]
