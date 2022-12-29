@@ -69,10 +69,16 @@ class Player(Person):
 
 class Parent(Person):
     child = models.ForeignKey(Player, on_delete=models.PROTECT)
+    adopted = models.BooleanField(
+        help_text="Tick if this parental relationship is not biological.",
+    )
 
 
 class GrandParent(Person):
     child = models.ForeignKey(Parent, on_delete=models.PROTECT)
+    adopted = models.BooleanField(
+        help_text="Tick if this parental relationship is not biological.",
+    )
 
     class Meta:
         verbose_name = "grandparent"
