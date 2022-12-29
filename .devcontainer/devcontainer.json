@@ -1,5 +1,5 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "image": "mcr.microsoft.com/vscode/devcontainers/python:3.9",
   "hostRequirements": {
     "cpus": 4
   },
@@ -7,15 +7,12 @@
   "updateContentCommand": "pip install -r requirements.txt && python manage.py migrate",
   "postCreateCommand": "",
   "postAttachCommand": {
-    "server": "python manage.py runserver",
-    "sslserver":"python manage.py runsslserver 8443"
+    "sslserver": "python manage.py runsslserver 8443"
   },
   "customizations": {
     "codespaces": {
       "openFiles": [
-        "eligibility/models.py",
-        "eligibility/admin.py",
-        "project/settings.py"
+        "README.md"
       ]
     },
     "vscode": {
@@ -25,16 +22,12 @@
     }
   },
   "portsAttributes": {
-    "8000": {
-      "label": "Application",
-      "onAutoForward": "openPreview",
-      "protocol": "http"
-    },
     "8443": {
-      "label": "Application Secure",
-      "onAutoForward": "openBrowser",
+      "label": "Application",
       "protocol": "https"
     }
   },
-  "forwardPorts": [8000,8443]
+  "forwardPorts": [
+    8443
+  ]
 }
