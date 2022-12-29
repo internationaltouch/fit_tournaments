@@ -18,6 +18,8 @@ django==3.2.16
     # via
     #   -r requirements.in
     #   django-sslserver
+django-nested-admin==4.0.2
+    # via -r requirements.in
 django-sslserver==0.22
     # via -r requirements.in
 idna==3.4
@@ -28,10 +30,14 @@ pep517==0.13.0
     # via build
 pip-tools==6.12.1
     # via -r requirements.in
+python-monkey-business==1.0.0
+    # via django-nested-admin
 pytz==2022.7
     # via django
 requests==2.28.1
     # via -r requirements.in
+six==1.16.0
+    # via python-monkey-business
 sqlparse==0.4.3
     # via django
 tomli==2.0.1
