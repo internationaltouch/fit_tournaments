@@ -1,7 +1,7 @@
 import uuid
 
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
 
 class Country(models.Model):
@@ -16,7 +16,7 @@ class Country(models.Model):
         return self.name
 
 
-class Player(models.Model):
+class Person(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(max_length=100)
     date_of_birth = models.DateField()
@@ -26,7 +26,7 @@ class Player(models.Model):
         null=True,
         help_text="If not one of these countries, leave blank and type below.",
         on_delete=models.PROTECT,
-        related_name="players_born",
+        related_name="%(class)ss_born",
     )
     country_of_birth_other = models.CharField(
         max_length=100,
@@ -35,6 +35,15 @@ class Player(models.Model):
         default=None,
         help_text="Only valid if not one of the countries listed above.",
     )
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.name
+
+
+class Player(Person):
     residence = models.ForeignKey(
         Country,
         blank=True,
@@ -50,9 +59,6 @@ class Player(models.Model):
         default=None,
         help_text="Only valid if not one of the countries listed above.",
     )
-
-    def __str__(self):
-        return self.name
 
     def clean(self):
         country_names = {
@@ -86,3 +92,14 @@ class Player(models.Model):
 
         if errors:
             raise ValidationError(errors)
+
+
+class Parent(Person):
+    child = models.ForeignKey(Player, on_delete=models.PROTECT)
+
+
+class GrandParent(Person):
+    child = models.ForeignKey(Parent, on_delete=models.PROTECT)
+
+    class Meta:
+        verbose_name = "grandparent"
