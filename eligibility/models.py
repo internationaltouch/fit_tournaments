@@ -1,6 +1,8 @@
 import uuid
 
 from django.db import models
+
+from eligibility.managers import PersonManager, PlayerManager
 from eligibility.utils import person_clean
 
 
@@ -66,6 +68,8 @@ class Player(Person):
         help_text="Only valid if not one of the countries listed above.",
     )
 
+    objects = PlayerManager()
+
 
 class Parent(Person):
     child = models.ForeignKey(Player, on_delete=models.PROTECT)
@@ -73,12 +77,16 @@ class Parent(Person):
         help_text="Tick if this parental relationship is not biological.",
     )
 
+    objects = PersonManager()
+
 
 class GrandParent(Person):
     child = models.ForeignKey(Parent, on_delete=models.PROTECT)
     adopted = models.BooleanField(
         help_text="Tick if this parental relationship is not biological.",
     )
+
+    objects = PersonManager()
 
     class Meta:
         verbose_name = "grandparent"
