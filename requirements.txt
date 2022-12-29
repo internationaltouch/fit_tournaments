@@ -20,6 +20,8 @@ django==3.2.16
     #   django-sslserver
 django-nested-admin==4.0.2
     # via -r requirements.in
+django-querycount==0.7.0
+    # via -r requirements.in
 django-sslserver==0.22
     # via -r requirements.in
 idna==3.4
