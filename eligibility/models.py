@@ -1,7 +1,7 @@
 import uuid
 
-from django.core.exceptions import ValidationError
 from django.db import models
+from eligibility.utils import person_clean
 
 
 class Country(models.Model):
@@ -42,6 +42,12 @@ class Person(models.Model):
     def __str__(self):
         return self.name
 
+    def clean(self):
+        country_names = {
+            c.lower() for c in Country.objects.values_list("name", flat=True)
+        }
+        person_clean(self, country_names)
+
 
 class Player(Person):
     residence = models.ForeignKey(
@@ -59,39 +65,6 @@ class Player(Person):
         default=None,
         help_text="Only valid if not one of the countries listed above.",
     )
-
-    def clean(self):
-        country_names = {
-            c.lower() for c in Country.objects.values_list("name", flat=True)
-        }
-        errors = {}
-
-        if self.country_of_birth_other:
-            if self.country_of_birth:
-                errors.setdefault("country_of_birth_other", []).append(
-                    "You may only provide a custom country of birth "
-                    "if you have not selected from the above."
-                )
-            if self.country_of_birth_other.strip().lower() in country_names:
-                errors.setdefault("country_of_birth_other", []).append(
-                    "You can't manually type in a country of birth "
-                    "that appears in the list above."
-                )
-
-        if self.residence_other:
-            if self.residence:
-                errors.setdefault("residence_other", []).append(
-                    "You may only provide a custom country of residence "
-                    "if you have not selected from the above."
-                )
-            if self.residence_other.strip().lower() in country_names:
-                errors.setdefault("residence_other", []).append(
-                    "You can't manually type in a country of residence "
-                    "that appears in the list above."
-                )
-
-        if errors:
-            raise ValidationError(errors)
 
 
 class Parent(Person):
