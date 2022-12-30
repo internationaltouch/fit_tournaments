@@ -1,4 +1,4 @@
-from django.db.models import Case, F, When
+from django.db.models import Case, F, Q, When
 from django.db.models.query import QuerySet
 
 
@@ -20,3 +20,18 @@ class PlayerQueryset(PersonQuerySet):
                 default=F("residence__name"),
             )
         )
+
+    def eligible_for(self, country_name):
+        return self.filter(
+            # Direct eligibility
+            Q(country_of_birth__name=country_name)
+            | Q(country_of_birth_other=country_name)
+            | Q(residence__name=country_name)
+            | Q(residence_other=country_name)
+            # Courtesy of parent place of birth
+            | Q(parent__country_of_birth__name=country_name)
+            | Q(parent__country_of_birth_other=country_name)
+            # Courtesy of grandparent place of birth
+            | Q(parent__grandparent__country_of_birth__name=country_name)
+            | Q(parent__grandparent__country_of_birth_other=country_name)
+        ).distinct()
