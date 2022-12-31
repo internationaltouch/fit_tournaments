@@ -1,3 +1,4 @@
+from django.core import serializers
 from django.core.exceptions import ValidationError
 
 
@@ -42,3 +43,12 @@ def person_clean(instance, country_names):
 
     if errors:
         raise ValidationError(errors)
+
+
+def person_snapshot(instance):
+    objects = [instance]
+    for parent in instance.parent_set.select_related():
+        objects.append(parent)
+        for grandparent in parent.grandparent_set.all():
+            objects.append(grandparent)
+    return serializers.serialize("json", objects)
