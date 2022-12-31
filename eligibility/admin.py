@@ -1,7 +1,7 @@
 import nested_admin
 from django.contrib import admin
 
-from eligibility.filters import DecadeBornListFilter
+from eligibility.filters import DecadeBornListFilter, EligibilityListFilter
 from eligibility.models import Country, GrandParent, Parent, Player
 
 
@@ -39,7 +39,7 @@ class ParentAdmin(nested_admin.NestedModelAdmin):
 @admin.register(Player)
 class PlayerAdmin(nested_admin.NestedModelAdmin):
     list_display = ("name", "date_of_birth", "country_of_birth", "eligible")
-    list_filter = (DecadeBornListFilter,)
+    list_filter = (EligibilityListFilter, DecadeBornListFilter)
     inlines = [
         ParentInline,
     ]
