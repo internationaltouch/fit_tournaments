@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mode_admin_filters',
     'nested_admin',
     'sslserver',
     'eligibility',

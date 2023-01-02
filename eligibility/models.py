@@ -3,7 +3,7 @@ from typing import List
 
 from django.db import models
 
-from eligibility.managers import PersonManager, PlayerManager
+from eligibility.managers import PersonManager, PlayerDeclarationManager, PlayerManager
 from eligibility.utils import person_clean, person_declaration_clean
 
 
@@ -41,6 +41,7 @@ class Person(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ("name",)
 
     def __str__(self):
         return self.name
@@ -150,6 +151,8 @@ class PlayerDeclaration(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
+
+    objects = PlayerDeclarationManager()
 
     def __str__(self):
         return f"{self.name} - {self.elected_country}"

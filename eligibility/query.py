@@ -1,4 +1,4 @@
-from django.db.models import Case, F, Q, When
+from django.db.models import BooleanField, Case, F, Q, Value, When
 from django.db.models.query import QuerySet
 
 
@@ -35,3 +35,16 @@ class PlayerQueryset(PersonQuerySet):
             | Q(parent__grandparent__country_of_birth__name=country_name)
             | Q(parent__grandparent__country_of_birth_other=country_name)
         ).distinct()
+
+
+class PlayerDeclarationQuerySet(QuerySet):
+    def is_supersceded(self):
+        return self.annotate(
+            is_supersceded=Case(
+                When(
+                    supersceded_by__isnull=False,
+                    then=Value(True, output_field=BooleanField()),
+                ),
+                default=Value(False, output_field=BooleanField()),
+            ),
+        )

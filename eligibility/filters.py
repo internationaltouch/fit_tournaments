@@ -3,6 +3,7 @@ from datetime import date
 from django.contrib import admin
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+from more_admin_filters import BooleanAnnotationFilter
 
 
 class DecadeBornListFilter(admin.SimpleListFilter):
@@ -65,3 +66,9 @@ class ElectedCountryListFilter(admin.SimpleListFilter):
         if self.value() is None:
             return queryset
         return queryset.filter(elected_country__name=self.value())
+
+
+class IsSuperscededListFilter(BooleanAnnotationFilter):
+    def __init__(self, request, params, model, model_admin):
+        super().__init__(request, params, model, model_admin)
+        self.title = _("supersceded or not")

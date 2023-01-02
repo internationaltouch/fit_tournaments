@@ -1,10 +1,12 @@
 import nested_admin
 from django.contrib import admin
+from more_admin_filters import RelatedDropdownFilter
 
 from eligibility.filters import (
     DecadeBornListFilter,
     ElectedCountryListFilter,
     EligibilityListFilter,
+    IsSuperscededListFilter,
 )
 from eligibility.models import Country, GrandParent, Parent, Player, PlayerDeclaration
 
@@ -58,7 +60,11 @@ class PlayerAdmin(nested_admin.NestedModelAdmin):
 @admin.register(PlayerDeclaration)
 class PlayerDeclarationAdmin(admin.ModelAdmin):
     list_display = ("name", "elected_country", "timestamp", "supersceded_by")
-    list_filter = (ElectedCountryListFilter,)
+    list_filter = (
+        ElectedCountryListFilter,
+        IsSuperscededListFilter.init("is_supersceded"),
+        ("player", RelatedDropdownFilter),
+    )
     fields = (
         "player",
         "name",
@@ -67,4 +73,4 @@ class PlayerDeclarationAdmin(admin.ModelAdmin):
         "supersceded_by",
         "data",
     )
-    readonly_fields = ("name", "eligible_for", "data")
+    readonly_fields = ("name", "eligible_for", "supersceded_by", "data")
