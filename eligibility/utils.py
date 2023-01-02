@@ -1,5 +1,7 @@
+import json
+
 from django.core import serializers
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
 def person_clean(instance, country_names):
@@ -51,4 +53,33 @@ def person_snapshot(instance):
         objects.append(parent)
         for grandparent in parent.grandparent_set.all():
             objects.append(grandparent)
-    return serializers.serialize("json", objects)
+    return json.loads(serializers.serialize("json", objects))
+
+
+def person_declaration_clean(instance):
+    errors = {}
+
+    if instance.timestamp is None:
+        # This is how we know we have not yet been saved. Future updates MUST not
+        # be allowed to modify the contents of the "name", "eligible_for", or
+        # "data" fields.
+        try:
+            instance.name = instance.player.name
+            instance.eligible_for = instance.player.eligible()
+            instance.data = person_snapshot(instance.player)
+        except ObjectDoesNotExist:
+            errors.setdefault("player", []).append(
+                "Player must be eligible for at least one country to make a declaration."
+            )
+
+    if (
+        instance.elected_country_id
+        and instance.elected_country.name not in instance.eligible_for
+    ):
+        errors.setdefault("elected_country", []).append(
+            f"{instance.elected_country} is not one that player is eligible for. "
+            f"Choices are {', '.join(instance.eligible_for)}."
+        )
+
+    if errors:
+        raise ValidationError(errors)

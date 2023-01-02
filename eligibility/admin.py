@@ -1,8 +1,12 @@
 import nested_admin
 from django.contrib import admin
 
-from eligibility.filters import DecadeBornListFilter, EligibilityListFilter
-from eligibility.models import Country, GrandParent, Parent, Player
+from eligibility.filters import (
+    DecadeBornListFilter,
+    ElectedCountryListFilter,
+    EligibilityListFilter,
+)
+from eligibility.models import Country, GrandParent, Parent, Player, PlayerDeclaration
 
 
 class GrandParentInline(nested_admin.NestedTabularInline):
@@ -16,6 +20,11 @@ class ParentInline(nested_admin.NestedTabularInline):
     inlines = [
         GrandParentInline,
     ]
+
+
+class PlayerDeclarationInline(nested_admin.NestedTabularInline):
+    model = PlayerDeclaration
+    extra = 0
 
 
 @admin.register(Country)
@@ -42,4 +51,13 @@ class PlayerAdmin(nested_admin.NestedModelAdmin):
     list_filter = (EligibilityListFilter, DecadeBornListFilter)
     inlines = [
         ParentInline,
+        PlayerDeclarationInline,
     ]
+
+
+@admin.register(PlayerDeclaration)
+class PlayerDeclarationAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "timestamp", "eligible_for")
+    list_filter = (ElectedCountryListFilter,)
+    fields = ("player", "name", "eligible_for", "elected_country", "supersceded_by", "data")
+    readonly_fields = ("name", "eligible_for", "data")

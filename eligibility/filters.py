@@ -1,7 +1,7 @@
 from datetime import date
 
-from django.db.models import Q
 from django.contrib import admin
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
 
@@ -48,5 +48,19 @@ class EligibilityListFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() is None:
             return queryset
-
         return queryset.eligible_for(self.value())
+
+
+class ElectedCountryListFilter(admin.SimpleListFilter):
+    title = _("elected to play for")
+    parameter_name = "country"
+
+    def lookups(self, request, model_admin):
+        return model_admin.model.objects.values_list(
+            "elected_country__name", "elected_country__name"
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() is None:
+            return queryset
+        return queryset.filter(elected_country__name=self.value())
