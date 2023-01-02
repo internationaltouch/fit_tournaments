@@ -57,7 +57,14 @@ class PlayerAdmin(nested_admin.NestedModelAdmin):
 
 @admin.register(PlayerDeclaration)
 class PlayerDeclarationAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "timestamp", "eligible_for")
+    list_display = ("name", "elected_country", "timestamp", "supersceded_by")
     list_filter = (ElectedCountryListFilter,)
-    fields = ("player", "name", "eligible_for", "elected_country", "supersceded_by", "data")
+    fields = (
+        "player",
+        "name",
+        "eligible_for",
+        "elected_country",
+        "supersceded_by",
+        "data",
+    )
     readonly_fields = ("name", "eligible_for", "data")

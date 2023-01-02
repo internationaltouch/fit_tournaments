@@ -57,8 +57,9 @@ class ElectedCountryListFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return model_admin.model.objects.values_list(
-            "elected_country__name", "elected_country__name"
-        )
+            "elected_country__name",
+            "elected_country__name",
+        ).distinct()
 
     def queryset(self, request, queryset):
         if self.value() is None:
