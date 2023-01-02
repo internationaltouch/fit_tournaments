@@ -81,5 +81,15 @@ def person_declaration_clean(instance):
             f"Choices are {', '.join(instance.eligible_for)}."
         )
 
+    if instance.supersceded_by == instance:
+        errors.setdefault("supersceded_by", []).append(
+            "A declaration may not superscede itself."
+        )
+
+    if instance.supersceded_by.player != instance.player:
+        errors.setdefault("supersceded_by", []).append(
+            "Must superscede a declaration from the same player."
+        )
+
     if errors:
         raise ValidationError(errors)

@@ -4,7 +4,7 @@ from typing import List
 from django.db import models
 
 from eligibility.managers import PersonManager, PlayerManager
-from eligibility.utils import person_clean, person_declaration_clean, person_snapshot
+from eligibility.utils import person_clean, person_declaration_clean
 
 
 class Country(models.Model):
