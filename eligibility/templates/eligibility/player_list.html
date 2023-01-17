@@ -53,17 +53,15 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for declaration in player.declarations.all reversed %}
-                                    {% if declaration.supersceded_by %}
-                                        <tr>
-                                            <td>{{ declaration.timestamp }}</td>
-                                            <td>
-                                                <a href="{% url 'declaration' declaration.pk %}">{{ declaration.elected_country }}</a>
-                                            </td>
-                                            <td>{{ declaration.supersceded_by.country }}
-                                                &mdash; {{ declaration.supersceded_by.timestamp|date }}</td>
-                                        </tr>
-                                    {% endif %}
+                                {% for declaration in player.declarations.supersceded %}
+                                    <tr>
+                                        <td>{{ declaration.timestamp }}</td>
+                                        <td>
+                                            <a href="{% url 'declaration' declaration.pk %}">{{ declaration.elected_country }}</a>
+                                        </td>
+                                        <td>{{ declaration.supersceded_by.elected_country }}
+                                            &mdash; {{ declaration.supersceded_by.timestamp|date }}</td>
+                                    </tr>
                                 {% endfor %}
                                 </tbody>
                             </table>
@@ -74,6 +72,6 @@
             </tbody>
         </table>
 
-        <a href="{% url 'players' %}" class="btn btn-primary">Add a player</a>
+        <a href="{% url 'player' %}" class="btn btn-primary">Add a player</a>
     </main>
 {% endblock container %}

@@ -157,7 +157,7 @@ class PlayerDeclaration(models.Model):
     objects = PlayerDeclarationManager()
 
     class Meta:
-        ordering = ("supersceded_by__timestamp",)
+        ordering = ("-timestamp",)
 
     def __str__(self):
         return f"{self.name} - {self.elected_country}"

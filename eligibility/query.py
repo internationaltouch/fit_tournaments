@@ -48,3 +48,6 @@ class PlayerDeclarationQuerySet(QuerySet):
                 default=Value(False, output_field=BooleanField()),
             ),
         )
+
+    def supersceded(self):
+        return self.exclude(supersceded_by__isnull=True)

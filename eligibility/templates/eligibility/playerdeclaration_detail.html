@@ -67,8 +67,7 @@
                             <table class="table mb-0 table-fixed">
                                 {% for key, value in dirty.items %}
                                     <tr>
-                                        <th class="col-4 col-xs-4">
-                                        {{ each|fieldname:key|capfirst }}</td>
+                                        <th class="col-4 col-xs-4">{{ each|fieldname:key|capfirst }}</td>
                                         <td class="col-4 col-xs-4 text-danger">{{ value.current|default_if_none:"-" }}</td>
                                         <td class="col-4 col-xs-4 text-success">{{ value.saved|default_if_none:"-" }}</td>
                                     </tr>
