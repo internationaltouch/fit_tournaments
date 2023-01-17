@@ -1,5 +1,5 @@
 django~=3.2
-django-formtools
+django-dirtyfields
 django-more-admin-filters
 django-nested-admin
 django-querycount

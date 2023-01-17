@@ -4,6 +4,13 @@ from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
+def boolean_coerce(value):
+    if value in {1, "1"}:
+        return True
+    if value in {0, "0"}:
+        return False
+
+
 def person_clean(instance, country_names):
     """
     Utility to handle raising ValidationError's for Player, Parent, and GrandParent models.

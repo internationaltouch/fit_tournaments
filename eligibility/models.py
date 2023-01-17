@@ -1,8 +1,10 @@
 import uuid
 from typing import List
 
+from dirtyfields import DirtyFieldsMixin
 from django.db import models
 
+from eligibility.fields import BooleanField, JSONField
 from eligibility.managers import PersonManager, PlayerDeclarationManager, PlayerManager
 from eligibility.utils import person_clean, person_declaration_clean
 
@@ -19,7 +21,7 @@ class Country(models.Model):
         return self.name
 
 
-class Person(models.Model):
+class Person(DirtyFieldsMixin, models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(max_length=100)
     date_of_birth = models.DateField()
@@ -85,7 +87,7 @@ class Player(Person):
 
 class Parent(Person):
     child = models.ForeignKey(Player, on_delete=models.PROTECT)
-    adopted = models.BooleanField(
+    adopted = BooleanField(
         help_text="Tick if this parental relationship is not biological.",
     )
 
@@ -141,7 +143,7 @@ class PlayerDeclaration(models.Model):
         ),
         on_delete=models.PROTECT,
     )
-    data = models.JSONField(
+    data = JSONField(
         editable=False,
         help_text="Serialized data that locks the values in time.",
     )
@@ -154,8 +156,34 @@ class PlayerDeclaration(models.Model):
 
     objects = PlayerDeclarationManager()
 
+    class Meta:
+        ordering = ("supersceded_by__timestamp",)
+
     def __str__(self):
         return f"{self.name} - {self.elected_country}"
+
+    def newly_added_ancestors(self):
+        """
+        The following ancestors were not recorded when the declaration was made; this can change the eligibility
+        standing of the individual _if_ an ancestor was born in a country not already seen amongst the other ancestors.
+        """
+        pks = [s.pk for s in self.data]
+        ancestors = [
+            p for p in Parent.objects.filter(child=self.player).exclude(pk__in=pks)
+        ]
+        ancestors += [
+            gp
+            for gp in GrandParent.objects.filter(child__child=self.player).exclude(
+                pk__in=pks
+            )
+        ]
+        return ancestors
+
+    def now_eligible_for(self):
+        """
+        The ForeignKey to Player does not exercise the custom manager, so we need to perform another query.
+        """
+        return Player.objects.get(pk=self.player.pk).eligible()
 
     def clean(self):
         person_declaration_clean(self)
