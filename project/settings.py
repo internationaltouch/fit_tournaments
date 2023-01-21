@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import collections
 from pathlib import Path
 
 import environ
@@ -165,3 +166,56 @@ AUTHENTICATION_BACKENDS = (
     'social_core.backends.linkedin.LinkedinOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+
+# Logging
+
+LOGGING_LEVELS = collections.defaultdict(
+    lambda: env("LOGLEVEL", default="WARNING"),
+    env.json("LOGLEVEL_LOGGERS", default={}),
+)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
+    },
+    "formatters": {
+        "verbose": {
+            "format": 'timestamp="%(asctime)s" '
+            'level="%(levelname)s" '
+            'process="%(processName)s" '
+            'thread="%(thread)d" '
+            'logger="%(name)s" '
+            'function="%(funcName)s" '
+            'message="%(message)s"'
+        },
+        "simple": {"format": "%(asctime)s %(levelname)s %(message)s"},
+    },
+    "handlers": {
+        "null": {"class": "logging.NullHandler"},
+        "console": {"class": "logging.StreamHandler", "formatter": "simple"},
+        "mail_admins": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "class": "django.utils.log.AdminEmailHandler",
+        },
+    },
+    "loggers": {
+        "django.db": {"handlers": ["console"], "level": LOGGING_LEVELS["django.db"]},
+        "django.security.DisallowedHost": {"handlers": ["console"], "propagate": False},
+        "django.request": {
+            "handlers": ["mail_admins", "console"],
+            "level": LOGGING_LEVELS["django.request"],
+            "propagate": True,
+        },
+        "": {"handlers": ["console"], "level": LOGGING_LEVELS[""]},
+    },
+}
+
+for logger_name in LOGGING_LEVELS:
+    LOGGING["loggers"][logger_name] = {
+        "handlers": ["console"],
+        "level": LOGGING_LEVELS[logger_name],
+    }
