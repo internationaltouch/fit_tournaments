@@ -3,6 +3,7 @@ from typing import List
 
 from dirtyfields import DirtyFieldsMixin
 from django.db import models
+from django.urls import reverse
 
 from eligibility.fields import BooleanField, JSONField
 from eligibility.managers import PersonManager, PlayerDeclarationManager, PlayerManager
@@ -83,6 +84,9 @@ class Player(Person):
     )
 
     objects = PlayerManager()
+
+    def get_absolute_url(self):
+        return reverse("player", kwargs={"pk": self.pk})
 
 
 class Parent(Person):
