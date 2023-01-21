@@ -1,8 +1,9 @@
-django~=3.2
 django-dirtyfields
 django-more-admin-filters
 django-nested-admin
 django-querycount
 django-sslserver
-requests
+django~=3.2
 pip-tools
+requests
+social-auth-app-django
