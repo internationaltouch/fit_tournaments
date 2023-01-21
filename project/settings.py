@@ -90,6 +90,25 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {"default": env.db(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
 
 
+# Email
+# https://docs.djangoproject.com/en/3.2/ref/settings/#email-backend
+
+EMAIL = env.email_url("EMAIL_URL", default="consolemail://")
+
+EMAIL_BACKEND = EMAIL["EMAIL_BACKEND"]
+EMAIL_HOST = EMAIL["EMAIL_HOST"]
+EMAIL_PORT = EMAIL["EMAIL_PORT"]
+EMAIL_USE_TLS = EMAIL.get("EMAIL_USE_TLS", False)
+EMAIL_HOST_USER = EMAIL["EMAIL_HOST_USER"]
+EMAIL_HOST_PASSWORD = EMAIL["EMAIL_HOST_PASSWORD"]
+EMAIL_FILE_PATH = EMAIL["EMAIL_FILE_PATH"]
+
+EMAIL_SUBJECT_PREFIX = env("EMAIL_SUBJECT_PREFIX", default="")
+
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="webmaster@tournaments.fit")
+SERVER_EMAIL = env("SERVER_EMAIL", default=DEFAULT_FROM_EMAIL)
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
