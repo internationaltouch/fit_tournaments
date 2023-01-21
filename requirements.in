@@ -1,4 +1,5 @@
 django-dirtyfields
+django-environ
 django-more-admin-filters
 django-nested-admin
 django-querycount

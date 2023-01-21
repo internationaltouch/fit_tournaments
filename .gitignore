@@ -1,6 +1,7 @@
 *.pyc
 /.buildenv
 /.coverage
+/.env
 /.idea
 /.tox
 /db.sqlite3
