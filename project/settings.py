@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'sslserver',
     'social_django',
     'eligibility',
+    'userprofile',
 ]
 
 MIDDLEWARE = [
@@ -134,8 +135,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Social Auth
-
-LOGIN_REDIRECT_URL = "/"
 
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 

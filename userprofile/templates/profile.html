@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ user }}</title>
+</head>
+<body>
+
+<h1>{{ user }}</h1>
+
+{% if backends.not_associated %}
+    <p>In case you lose access to your existing linked social account{{ backends.associated|pluralize }},
+        you can link another from the services below.</p>
+    <ul>
+        {% for backend in backends.not_associated %}
+            <li><a href="{% url 'social:begin' backend %}">{{ backend }}</a></li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if backends.associated.count > 1 %}
+    <p>You are connected using the following social accounts, you can disconnect all but one of them.</p>
+    <div>
+        {% for backend in backends.associated %}
+            <form action="{% url 'social:disconnect_individual' backend.provider backend.pk %}" method="post"
+                  style="display: inline;">
+                {% csrf_token %}
+                <button type="submit">Disconnect {{ backend.provider }}</button>
+            </form>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>Unable to disconnect from your only social profile <strong>{{ backends.associated.first.provider }}</strong>.</p>
+{% endif %}
+
+</body>
+</html>

@@ -5,7 +5,7 @@
 <h1>Login</h1>
 
 {% for each in backends.not_associated %}
-    <p><a href="{% url 'social:begin' each %}">{{ each }}</a></p>
+    <p><a href="{% url 'social:begin' each %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">{{ each }}</a></p>
 {% endfor %}
 
 {% endblock container %}
