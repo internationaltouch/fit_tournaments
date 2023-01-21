@@ -1,5 +1,28 @@
 {
-  "image": "mcr.microsoft.com/vscode/devcontainers/python:3.9",
+  "name": "Python 3 and PostgreSQL",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "extensions": [
+    "ms-python.python",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg"
+  ],
+  "settings": {
+    "sqltools.connections": [
+      {
+        "name": "Container database",
+        "driver": "PostgreSQL",
+        "previewLimit": 50,
+        "server": "localhost",
+        "port": 5432,
+        "database": "tournaments",
+        "username": "tournaments",
+        "password": "tournaments"
+      }
+    ],
+    "python.pythonPath": "/usr/local/bin/python"
+  },
   "hostRequirements": {
     "cpus": 4
   },

@@ -52,6 +52,8 @@ pep517==0.13.0
     # via build
 pip-tools==6.12.1
     # via -r requirements.in
+psycopg2==2.9.5
+    # via -r requirements.in
 pycparser==2.21
     # via cffi
 pyjwt==2.6.0

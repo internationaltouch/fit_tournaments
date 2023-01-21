@@ -74,6 +74,8 @@ pep517==0.13.0
     #   build
 pip-tools==6.12.1
     # via -r requirements.txt
+psycopg2==2.9.5
+    # via -r requirements.txt
 pycparser==2.21
     # via
     #   -r requirements.txt
@@ -121,10 +123,7 @@ sqlparse==0.4.3
     #   -r requirements.txt
     #   django
 tomli==2.0.1
-    # via
-    #   -r requirements.txt
-    #   build
-    #   pep517
+    # via -r requirements.txt
 urllib3==1.26.13
     # via
     #   -r requirements.txt

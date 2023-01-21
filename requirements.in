@@ -6,5 +6,6 @@ django-querycount
 django-sslserver
 django~=3.2
 pip-tools
+psycopg2
 requests
 social-auth-app-django
