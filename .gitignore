@@ -5,3 +5,4 @@
 /.idea
 /.tox
 /db.sqlite3
+/static
