@@ -55,6 +55,8 @@ factory-boy==3.2.1
     # via -r test-requirements.in
 faker==15.3.4
     # via factory-boy
+gunicorn==20.1.0
+    # via -r requirements.txt
 idna==3.4
     # via
     #   -r requirements.txt
@@ -123,7 +125,10 @@ sqlparse==0.4.3
     #   -r requirements.txt
     #   django
 tomli==2.0.1
-    # via -r requirements.txt
+    # via
+    #   -r requirements.txt
+    #   build
+    #   pep517
 urllib3==1.26.13
     # via
     #   -r requirements.txt

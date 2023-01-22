@@ -40,6 +40,8 @@ django-querycount==0.7.0
     # via -r requirements.in
 django-sslserver==0.22
     # via -r requirements.in
+gunicorn==20.1.0
+    # via -r requirements.in
 idna==3.4
     # via requests
 oauthlib==3.2.2

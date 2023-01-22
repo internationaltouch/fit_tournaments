@@ -5,6 +5,7 @@ django-nested-admin
 django-querycount
 django-sslserver
 django~=3.2
+gunicorn
 pip-tools
 psycopg2
 requests
