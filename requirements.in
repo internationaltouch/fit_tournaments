@@ -1,5 +1,6 @@
 django-dirtyfields
 django-environ
+django-htmx
 django-more-admin-filters
 django-nested-admin
 django-querycount
