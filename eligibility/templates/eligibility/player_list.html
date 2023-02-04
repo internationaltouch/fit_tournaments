@@ -31,17 +31,18 @@
                     </td>
                     <td>
                         {% with player.declarations.first as declaration %}
+                            {% url 'declaration' player.pk as declaration_url %}
                             {% if declaration.pk %}
                                 {% url 'declaration' player.pk declaration.pk as url %}
                                 <a href="{{ url }}">{{ declaration.elected_country }}</a>
                                 &mdash; {{ declaration.timestamp }}
                                 {% if player.can_declare_bool %}
-                                    <a class="btn btn-secondary btn-sm" href="{% url 'declaration' player.pk %}">Revise</a>
+                                    {% bootstrap_button "Revise" button_type="link" size="small" href=declaration_url button_class="btn-secondary" %}
                                 {% else %}
                                     <button class="btn btn-warning btn-sm">Error State</button>
                                 {% endif %}
                             {% elif player.can_declare_bool %}
-                                <a class="btn btn-secondary btn-sm" href="{% url 'declaration' player.pk %}">Make declaration</a>
+                                {% bootstrap_button "Make declaration" button_type="link" size="small" href=declaration_url %}
                             {% else %}
                                 <small>{{ player.unable_to_declare_reason }}</small>
                             {% endif %}

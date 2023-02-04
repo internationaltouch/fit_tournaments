@@ -1,11 +1,5 @@
-{% extends "eligibility/base.html" %}
+{% extends "eligibility/base_form.html" %}
 
-{% block container %}
+{% block before_form %}
     <h1>New player</h1>
-    <form action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn btn-primary" type="submit">Save</button>
-        <a class="btn btn-secondary" href="{% url 'players' %}">Cancel</a>
-    </form>
 {% endblock %}

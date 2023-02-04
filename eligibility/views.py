@@ -30,6 +30,11 @@ class PlayerCreate(LoginRequiredMixin, CreateView):
     model = Player
     form_class = PlayerForm
 
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["cancel_url"] = reverse("players")
+        return context
+
 
 class PlayerEdit(LoginRequiredMixin, UpdateView):
     model = Player
