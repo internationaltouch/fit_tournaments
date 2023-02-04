@@ -35,7 +35,8 @@ class PlayerDeclarationForm(BootstrapFormControlMixin, forms.ModelForm):
         qs = self.fields["elected_country"].queryset.filter(name__in=player.eligible())
         try:
             current = player.declarations.first()
-            qs = qs.exclude(name=current.elected_country)
+            if current is not None:
+                qs = qs.exclude(name=current.elected_country)
         except PlayerDeclaration.DoesNotExist:
             pass
         self.fields["elected_country"].queryset = qs
