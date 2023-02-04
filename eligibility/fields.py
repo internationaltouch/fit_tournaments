@@ -1,3 +1,4 @@
+from bootstrap5.widgets import RadioSelectButtonGroup
 from django import forms
 from django.core import serializers
 from django.core.serializers.base import DeserializationError
@@ -7,12 +8,11 @@ from django.utils.translation import gettext_lazy as _
 
 from eligibility.utils import boolean_coerce
 
-
 # FORM FIELDS
 
 
 class BooleanChoiceField(forms.TypedChoiceField):
-    widget = forms.RadioSelect
+    widget = RadioSelectButtonGroup
 
     def __init__(self, *args, **kwargs):
         defaults = {

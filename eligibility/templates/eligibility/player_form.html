@@ -4,26 +4,8 @@
     <h1>New player</h1>
     <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-
-        <div class="row">
-            <div class="col">{{ form.name }}</div>
-            <div class="col">{{ form.date_of_birth }}</div>
-        </div>
-
-        <div class="row">
-            <div class="col">
-                {{ form.country_of_birth.label }}
-                {{ form.country_of_birth }}{{ form.country_of_birth.help_text }}
-                {{ form.country_of_birth_other }}{{ form.country_of_birth_other.help_text }}
-            </div>
-
-            <div class="col">
-                {{ form.residence.label }}
-                {{ form.residence }}{{ form.residence.help_text }}
-                {{ form.residence_other }}{{ form.residence_other.help_text }}
-            </div>
-        </div>
-
-        <input type="submit">
+        {{ form.as_p }}
+        <button class="btn btn-primary" type="submit">Save</button>
+        <a class="btn btn-secondary" href="{% url 'players' %}">Cancel</a>
     </form>
 {% endblock %}

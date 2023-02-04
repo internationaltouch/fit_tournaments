@@ -1,37 +1,74 @@
 {% extends "eligibility/base.html" %}
+{% load bootstrap5 %}
 
 {% block container %}
-    <h1>{{ object }}</h1>
+    <main>
+        <h1>{{ object }}</h1>
 
-    <table class="table table-striped">
-        <tbody>
-        <tr>
-            <th class="col-2">Name</th>
-            <td>{{ object.name }}</td>
-            <td class="col-4 text-secondary">The name of the player.</td>
-        </tr>
-        <tr>
-            <th class="col-2">Country of birth</th>
-            <td>{{ object.birthplace }}</td>
-            <td class="col-4 text-secondary">The country in which the player claims they were born.</td>
-        </tr>
-        <tr>
-            <th class="col-2">Country of residence</th>
-            <td>{{ object.residency }}</td>
-            <td class="col-4 text-secondary">The country in which the player claims they have residency.</td>
-        </tr>
-        <tr>
-            <th class="col-2">Eligible for</th>
-            <td>
-                {% for each in object.eligible %}
-                    <span>{{ each }}{% if not forloop.last %},{% endif %}</span>
-                {% endfor %}
-            </td>
-            <td class="col-4 text-secondary">
-                The countries that the player is eligible for, based on the information provided.
-            </td>
-        </tr>
-        </tbody>
-    </table>
+        <table class="table table-striped">
+            <tbody>
+            <tr>
+                <th class="col-2">Name</th>
+                <td>{{ object.name }}</td>
+                <td class="col-4 text-secondary">The name of the player.</td>
+            </tr>
+            <tr>
+                <th class="col-2">Country of birth</th>
+                <td>{{ object.birthplace }}</td>
+                <td class="col-4 text-secondary">The country in which the player claims they were born.</td>
+            </tr>
+            <tr>
+                <th class="col-2">Country of residence</th>
+                <td>{{ object.residency }}</td>
+                <td class="col-4 text-secondary">The country in which the player claims they have residency.</td>
+            </tr>
+            <tr>
+                <th class="col-2">Eligible for</th>
+                <td>
+                    {% for each in object.eligible %}
+                        <span>{{ each }}{% if not forloop.last %},{% endif %}</span>
+                    {% endfor %}
+                </td>
+                <td class="col-4 text-secondary">
+                    The countries that the player is eligible for, based on the information provided.
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
+        {% buttons %}
+            {% url 'declaration' object.pk as declaration_url %}
+            {% with extra_classes=object.can_declare_bool|yesno:",disabled" %}
+                {% bootstrap_button "Make declaration" button_type="link" href=declaration_url extra_classes=extra_classes %}
+            {% endwith %}
+            {% url 'players' as cancel_url %}
+            {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
+        {% endbuttons %}
+
+        <h2>Ancestry</h2>
+
+        <div class="row mb-3">
+            {% for parent in object.parent_set.all %}
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <a href="{% url 'parent' object.pk parent.pk %}">{{ parent }}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url 'grandparent' object.pk parent.pk %}">Add a grandparent</a>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for grandparent in parent.grandparent_set.all %}
+                                <li class="list-group-item"><a href="{% url 'grandparent' object.pk parent.pk grandparent.pk %}">{{ grandparent }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group me-2" role="group" aria-label="First button group">
+                <a class="btn btn-primary" href="{% url 'parent' object.pk %}">Add a parent</a>
+            </div>
+        </div>
+    </main>
 {% endblock container %}

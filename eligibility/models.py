@@ -1,9 +1,10 @@
 import uuid
-from typing import List
+from typing import Any, List
 
 from dirtyfields import DirtyFieldsMixin
 from django.db import models
 from django.urls import reverse
+from django.utils.functional import cached_property
 
 from eligibility.fields import BooleanField, JSONField
 from eligibility.managers import PersonManager, PlayerDeclarationManager, PlayerManager
@@ -88,10 +89,34 @@ class Player(Person):
     def get_absolute_url(self):
         return reverse("player", kwargs={"pk": self.pk})
 
+    def can_declare(self):
+        if self.parent_set.exclude(adopted=True).count() < 2:
+            raise ValueError("Must have at least two biological parents.")
+        for parent in self.parent_set.all():
+            if parent.grandparent_set.exclude(adopted=True).count() < 2:
+                raise ValueError(
+                    "At least one parent does not have at least two biological parents."
+                )
+
+    @cached_property
+    def can_declare_bool(self):
+        try:
+            self.can_declare()
+        except ValueError:
+            return False
+        return True
+
+    def unable_to_declare_reason(self):
+        try:
+            self.can_declare()
+        except ValueError as exc:
+            return str(exc)
+
 
 class Parent(Person):
     child = models.ForeignKey(Player, on_delete=models.PROTECT)
     adopted = BooleanField(
+        default=False,
         help_text="Tick if this parental relationship is not biological.",
     )
 
@@ -100,7 +125,8 @@ class Parent(Person):
 
 class GrandParent(Person):
     child = models.ForeignKey(Parent, on_delete=models.PROTECT)
-    adopted = models.BooleanField(
+    adopted = BooleanField(
+        default=False,
         help_text="Tick if this parental relationship is not biological.",
     )
 

@@ -1,4 +1,5 @@
 {% extends "eligibility/base.html" %}
+{% load bootstrap5 %}
 
 {% block container %}
     <main>
@@ -11,7 +12,7 @@
 
         <h2>Players</h2>
 
-        <table class="table table-striped table-fixed">
+        <table class="table table-borderless table-striped table-fixed align-middle">
             <thead>
             <tr>
                 <th scope="col" class="col-4">Name</th>
@@ -31,11 +32,18 @@
                     <td>
                         {% with player.declarations.first as declaration %}
                             {% if declaration.pk %}
-                                {% url 'declaration' declaration.pk as url %}
+                                {% url 'declaration' player.pk declaration.pk as url %}
                                 <a href="{{ url }}">{{ declaration.elected_country }}</a>
-                                &mdash; {{ declaration.timestamp|date }}
+                                &mdash; {{ declaration.timestamp }}
+                                {% if player.can_declare_bool %}
+                                    <a class="btn btn-secondary btn-sm" href="{% url 'declaration' player.pk %}">Revise</a>
+                                {% else %}
+                                    <button class="btn btn-warning btn-sm">Error State</button>
+                                {% endif %}
+                            {% elif player.can_declare_bool %}
+                                <a class="btn btn-secondary btn-sm" href="{% url 'declaration' player.pk %}">Make declaration</a>
                             {% else %}
-                                &ndash;
+                                <small>{{ player.unable_to_declare_reason }}</small>
                             {% endif %}
                         {% endwith %}
                     </td>
@@ -43,7 +51,7 @@
                 {% if player.declarations.count > 1 %}
                     <tr>
                         <td colspan="3" class="p-0">
-                            <table class="table mb-0 table-fixed">
+                            <table class="table table-borderless mb-0 table-fixed align-middle">
                                 <thead>
                                 <tr>
                                     <th scope="col" class="col-4">Timestamp</th>
@@ -56,10 +64,9 @@
                                     <tr>
                                         <td>{{ declaration.timestamp }}</td>
                                         <td>
-                                            <a href="{% url 'declaration' declaration.pk %}">{{ declaration.elected_country }}</a>
+                                            <a href="{% url 'declaration' player.pk declaration.pk %}">{{ declaration.elected_country }}</a>
                                         </td>
-                                        <td>{{ declaration.supersceded_by.elected_country }}
-                                            &mdash; {{ declaration.supersceded_by.timestamp|date }}</td>
+                                        <td>{{ declaration.supersceded_by.elected_country }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -71,6 +78,11 @@
             </tbody>
         </table>
 
-        <a href="{% url 'player' %}" class="btn btn-primary">Add a player</a>
+        {% buttons %}
+            {% url 'player' as add_player_url %}
+            {% bootstrap_button "Add a player" button_type="link" href=add_player_url %}
+            {% url 'index' as cancel_url %}
+            {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
+        {% endbuttons %}
     </main>
 {% endblock container %}

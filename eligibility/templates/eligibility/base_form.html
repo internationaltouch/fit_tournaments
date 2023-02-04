@@ -1,0 +1,14 @@
+{% extends "eligibility/base.html" %}
+{% load bootstrap5 %}
+
+{% block container %}
+    {% block before_form %}{% endblock %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form form layout='horizontal' %}
+        {% buttons submit='Save' %}
+            {% bootstrap_button "Clear" button_type="reset" button_class="btn-secondary" %}
+            {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
+        {% endbuttons %}
+    </form>
+{% endblock %}

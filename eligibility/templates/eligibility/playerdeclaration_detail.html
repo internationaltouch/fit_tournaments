@@ -2,6 +2,7 @@
 {% load eligibility_tags %}
 
 {% block container %}
+<main>
     <h1>Player Declaration</h1>
 
     <p>Based on the data supplied at the time, the following declaration was collected.</p>
@@ -103,4 +104,6 @@
         </tbody>
     </table>
 
+    <a class="btn btn-secondary" href="{% url 'players' %}">Go Back</a>
+</main>
 {% endblock %}
