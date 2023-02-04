@@ -1,109 +1,114 @@
 {% extends "eligibility/base.html" %}
-{% load eligibility_tags %}
+{% load bootstrap5 eligibility_tags %}
 
 {% block container %}
-<main>
-    <h1>Player Declaration</h1>
-
-    <p>Based on the data supplied at the time, the following declaration was collected.</p>
-
-    <table class="table">
-        <tbody>
-        <tr>
-            <th class="col-2">Name</th>
-            <td>{{ object.name }}</td>
-            <td class="col-4 text-secondary">The name of the player this declaration is made for.</td>
-        </tr>
-        <tr>
-            <th class="col-2">Submitted by</th>
-            <td>{{ object.user }}<span class="text-warning">To be implemented</span></td>{# TODO #}
-            <td class="col-4 text-secondary">The user of the system who made the declaration.</td>
-        </tr>
-        <tr>
-            <th class="col-2">Date</th>
-            <td>{{ object.timestamp }}</td>
-            <td class="col-4 text-secondary">The date and time that the declaration was made.</td>
-        </tr>
-        <tr>
-            <th class="col-2">Eligible for</th>
-            <td>
-                {% ifnotequal object.eligible_for object.now_eligible_for %}
-                    {% for each in object.eligible_for|diff:object.now_eligible_for %}
-                        <span class="{{ each.state|yesno:"text-success,text-danger," }}">{{ each.value }}
-                            {% if not forloop.last %},{% endif %}</span>
-                    {% endfor %}
-                {% endifnotequal %}
-            </td>
-            <td class="col-4 text-secondary">The countries that the player is eligible for, based on their declaration.
-                Any changes made since the declaration are colour coded.
-            </td>
-        </tr>
-        <tr>
-            <th class="col-2">Elected country</th>
-            <td>{{ object.elected_country }}</td>
-            <td class="col-4 text-secondary">The country that the player chose to play in this declaration.</td>
-        </tr>
-        </tbody>
-    </table>
-
-    <h2>Declared ancestry</h2>
-
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th scope="col"></th>
-            <th scope="col">Submission</th>
-            <th scope="col">Changes</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for each in object.data %}
-            <tr>
-                <th>
-                {{ each|type|title }}</td>
-                <td>{{ each.name }}</td>
-                <td class="p-0">
-                    {% with dirty=each|dirty %}
-                        {% if dirty %}
-                            <table class="table mb-0 table-fixed">
-                                {% for key, value in dirty.items %}
-                                    <tr>
-                                        <th class="col-4 col-xs-4">{{ each|fieldname:key|capfirst }}</td>
-                                        <td class="col-4 col-xs-4 text-danger">{{ value.current|default_if_none:"-" }}</td>
-                                        <td class="col-4 col-xs-4 text-success">{{ value.saved|default_if_none:"-" }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        {% endif %}
-                    {% endwith %}
-                </td>
-            </tr>
-        {% endfor %}
-        {% for each in object.newly_added_ancestors %}
-            <tr>
-                <th>{{ each|type|title }}</th>
-                <td>-</td>
-                <td class="p-0">
-                    {% with dirty=each|model_to_dict:"child" %}
-                        <table class="table mb-0 table-fixed">
-                            {% for key, value in dirty.items %}
-                                {% if value is not None %}
-                                    <tr>
-                                        <th class="col-4 col-xs-4">
-                                        {{ each|fieldname:key|capfirst }}</td>
-                                        <td class="col-4 col-xs-4 text-danger">-</td>
-                                        <td class="col-4 col-xs-4 text-success">{{ value|default_if_none:"-" }}</td>
-                                    </tr>
-                                {% endif %}
+    <main class="mt-3">
+        <div class="card mb-3">
+            <h4 class="card-header text-center">Player Declaration</h4>
+            <div class="card-body">
+                Based on the data supplied at the time, the following declaration was collected.
+            </div>
+            <table class="table mb-0">
+                <tbody>
+                <tr>
+                    <th class="col-2">Name</th>
+                    <td>{{ object.name }}</td>
+                    <td class="col-4 text-secondary">The name of the player this declaration is made for.</td>
+                </tr>
+                <tr>
+                    <th class="col-2">Submitted by</th>
+                    <td>{{ object.user }}<span class="text-warning">To be implemented</span></td>{# TODO #}
+                    <td class="col-4 text-secondary">The user of the system who made the declaration.</td>
+                </tr>
+                <tr>
+                    <th class="col-2">Date</th>
+                    <td>{{ object.timestamp }}</td>
+                    <td class="col-4 text-secondary">The date and time that the declaration was made.</td>
+                </tr>
+                <tr>
+                    <th class="col-2">Eligible for</th>
+                    <td>
+                        {% ifnotequal object.eligible_for object.now_eligible_for %}
+                            {% for each in object.eligible_for|diff:object.now_eligible_for %}
+                                <span class="{{ each.state|yesno:"text-success,text-danger," }}">{{ each.value }}
+                                    {% if not forloop.last %},{% endif %}</span>
                             {% endfor %}
-                        </table>
-                    {% endwith %}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                        {% endifnotequal %}
+                    </td>
+                    <td class="col-4 text-secondary">The countries that the player is eligible for, based on their declaration.
+                        Any changes made since the declaration are colour coded.
+                    </td>
+                </tr>
+                <tr>
+                    <th class="col-2">Elected country</th>
+                    <td>{{ object.elected_country }}</td>
+                    <td class="col-4 text-secondary">The country that the player chose to play in this declaration.</td>
+                </tr>
+                </tbody>
+            </table>
 
-    <a class="btn btn-secondary" href="{% url 'players' %}">Go Back</a>
-</main>
+            <h5 class="card-header text-center">Ancestry</h5>
+
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th scope="col">Submission</th>
+                        <th scope="col">Changes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for each in object.data %}
+                        <tr>
+                            <th>
+                            {{ each|type|title }}</td>
+                            <td>{{ each.name }}</td>
+                            <td class="p-0">
+                                {% with dirty=each|dirty %}
+                                    {% if dirty %}
+                                        <table class="table mb-0 table-fixed">
+                                            {% for key, value in dirty.items %}
+                                                <tr>
+                                                    <th class="col-4 col-xs-4">{{ each|fieldname:key|capfirst }}</td>
+                                                    <td class="col-4 col-xs-4 text-danger">{{ value.current|default_if_none:"-" }}</td>
+                                                    <td class="col-4 col-xs-4 text-success">{{ value.saved|default_if_none:"-" }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% for each in object.newly_added_ancestors %}
+                        <tr>
+                            <th>{{ each|type|title }}</th>
+                            <td>-</td>
+                            <td class="p-0">
+                                {% with dirty=each|model_to_dict:"child" %}
+                                    <table class="table mb-0 table-fixed">
+                                        {% for key, value in dirty.items %}
+                                            {% if value is not None %}
+                                                <tr>
+                                                    <th class="col-4 col-xs-4">
+                                                    {{ each|fieldname:key|capfirst }}</td>
+                                                    <td class="col-4 col-xs-4 text-danger">-</td>
+                                                    <td class="col-4 col-xs-4 text-success">{{ value|default_if_none:"-" }}</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </table>
+                                {% endwith %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="card-footer">
+                {% url 'players' as players_url %}
+                {% bootstrap_button "Players" button_type="link" href=players_url %}
+                {% bootstrap_button object.player button_type="link" href=object.player.get_absolute_url button_class="btn-secondary" %}
+            </div>
+        </div>
+    </main>
 {% endblock %}
