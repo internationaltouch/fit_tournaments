@@ -26,7 +26,7 @@ class Country(models.Model):
 class Person(DirtyFieldsMixin, models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(max_length=100)
-    date_of_birth = models.DateField()
+    date_of_birth = models.DateField(help_text="Please use YYYY-MM-DD format.")
     country_of_birth = models.ForeignKey(
         Country,
         blank=True,
