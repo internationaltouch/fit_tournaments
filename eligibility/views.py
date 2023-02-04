@@ -73,6 +73,21 @@ class ParentCreate(LoginRequiredMixin, CreateView):
         return context
 
 
+class ParentEdit(LoginRequiredMixin, UpdateView):
+    model = Parent
+    form_class = ParentForm
+
+    def get_success_url(self) -> str:
+        return reverse("player", args=(self.kwargs["player"],))
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        player = context["form"].instance.child
+        context["player"] = player
+        context["cancel_url"] = reverse("player", args=(player.pk,))
+        return context
+
+
 class GrandParentCreate(LoginRequiredMixin, CreateView):
     model = GrandParent
     form_class = GrandParentForm
@@ -90,6 +105,22 @@ class GrandParentCreate(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         parent = context["form"].instance.child
         context["parent"] = parent
+        context["cancel_url"] = reverse("player", args=(parent.child.pk,))
+        return context
+
+
+class GrandParentEdit(LoginRequiredMixin, UpdateView):
+    model = GrandParent
+    form_class = GrandParentForm
+
+    def get_success_url(self) -> str:
+        return reverse("player", args=(self.kwargs["player"],))
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        parent = context["form"].instance.child
+        context["parent"] = parent
+        context["player"] = parent.child
         context["cancel_url"] = reverse("player", args=(parent.child.pk,))
         return context
 

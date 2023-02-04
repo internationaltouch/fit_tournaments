@@ -13,13 +13,13 @@ class PlayerForm(BootstrapFormControlMixin, forms.ModelForm):
 class ParentForm(forms.ModelForm):
     class Meta:
         model = Parent
-        exclude = ("child",)
+        fields = ("name", "date_of_birth", "country_of_birth", "country_of_birth_other", "adopted")
 
 
 class GrandParentForm(BootstrapFormControlMixin, forms.ModelForm):
     class Meta:
         model = GrandParent
-        exclude = ("child",)
+        fields = ("name", "date_of_birth", "country_of_birth", "country_of_birth_other", "adopted")
 
 
 class PlayerDeclarationForm(BootstrapFormControlMixin, forms.ModelForm):
