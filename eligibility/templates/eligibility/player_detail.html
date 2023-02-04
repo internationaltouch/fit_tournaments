@@ -36,6 +36,10 @@
             </tbody>
         </table>
 
+        {% if not object.can_declare_bool %}
+            {% bootstrap_alert object.unable_to_declare_reason alert_type="warning" dismissible=True %}
+        {% endif %}
+
         {% buttons %}
             {% url 'declaration' object.pk as declaration_url %}
             {% with extra_classes=object.can_declare_bool|yesno:",disabled" %}
