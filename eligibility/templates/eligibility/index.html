@@ -1,23 +1,25 @@
 {% extends "eligibility/base.html" %}
+{% load bootstrap5 %}
 
 {% block page_title %}Player Eligibility Portal{% endblock %}
 
 {% block container %}
     <main>
         <div class="row g-5">
-            <div class="col-md-6">
+            <div class="col md-6">
                 <h2>Player portal</h2>
                 <p>If you're intending to play at a FIT tournament, you will need to provide us with details of your
                     birthplace and residency, as well as the birthplace of your parents and grandparents, in order to
                     determine which countries you're eligible for.</p>
-                <a href="{% url 'players' %}" class="btn btn-primary">Next</a>
+                {% url 'players' as player_portal %}
+                {% bootstrap_button "Begin" button_type="link" href=player_portal %}
             </div>
-            <div class="col-md-6">
+            <div class="col md-6">
                 <h2>Administrator portal</h2>
                 <p>After players have provided their details and nominated the country they plan to represent, that
                     country needs to verify them and also needs to declare any dual nationals who are selected in their
                     preliminary squads and final teams.</p>
-                <a href="#" class="btn btn-primary">Next</a>
+                {% bootstrap_button "Begin" button_type="link" href="#" extra_classes="disabled" %}
             </div>
         </div>
     </main>
