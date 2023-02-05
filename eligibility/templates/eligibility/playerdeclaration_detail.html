@@ -6,48 +6,53 @@
         <div class="card mb-3">
             <h4 class="card-header text-center">Player Declaration</h4>
             <div class="card-body">
-                Based on the data supplied at the time, the following declaration was collected.
-            </div>
-            <table class="table mb-0">
-                <tbody>
-                <tr>
-                    <th class="col-2">Name</th>
-                    <td>{{ object.name }}</td>
-                    <td class="col-4 text-secondary">The name of the player this declaration is made for.</td>
-                </tr>
-                <tr>
-                    <th class="col-2">Submitted by</th>
-                    <td>{{ object.user }}<span class="text-warning">To be implemented</span></td>{# TODO #}
-                    <td class="col-4 text-secondary">The user of the system who made the declaration.</td>
-                </tr>
-                <tr>
-                    <th class="col-2">Date</th>
-                    <td>{{ object.timestamp }}</td>
-                    <td class="col-4 text-secondary">The date and time that the declaration was made.</td>
-                </tr>
-                <tr>
-                    <th class="col-2">Eligible for</th>
-                    <td>
-                        {% ifnotequal object.eligible_for object.now_eligible_for %}
-                            {% for each in object.eligible_for|diff:object.now_eligible_for %}
-                                <span class="{{ each.state|yesno:"text-success,text-danger," }}">{{ each.value }}
-                                    {% if not forloop.last %},{% endif %}</span>
-                            {% endfor %}
-                        {% endifnotequal %}
-                    </td>
-                    <td class="col-4 text-secondary">The countries that the player is eligible for, based on their declaration.
-                        Any changes made since the declaration are colour coded.
-                    </td>
-                </tr>
-                <tr>
-                    <th class="col-2">Elected country</th>
-                    <td>{{ object.elected_country }}</td>
-                    <td class="col-4 text-secondary">The country that the player chose to play in this declaration.</td>
-                </tr>
-                </tbody>
-            </table>
+                <p>Based on the data supplied at the time, the following declaration was collected.</p>
 
-            <h5 class="card-header text-center">Ancestry</h5>
+                <div class="mb-3 row">
+                    <h5 class="col-md-3 col-form-label">Name</h5>
+                    <div class="col-md-9">
+                        {{ object.name }}
+                        <div class="form-text">The name of the player this declaration is made for.</div>
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <h5 class="col-md-3 col-form-label">Submitted by</h5>
+                    <div class="col-md-9">
+                        <span class="badge bg-warning">To be implemented</span>
+                        <div class="form-text">The user of the system who made the declaration.</div>
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <h5 class="col-md-3 col-form-label">Date</h5>
+                    <div class="col-md-9">
+                        {{ object.timestamp }}
+                        <div class="form-text">The date and time that the declaration was made.</div>
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <h5 class="col-md-3 col-form-label">Eligible for</h5>
+                    <div class="col-md-9">
+                        {% for each in object.eligible_for|diff:object.now_eligible_for %}{% if forloop.last %}and {% endif %}<span class="{{ each.state|yesno:"text-success,text-danger," }}">{{ each.value }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}
+                        <div class="form-text">
+                            The countries that the player is eligible for, based on their declaration.
+                            Any changes made since the declaration are colour coded.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    <h5 class="col-md-3 col-form-label">Elected country</h5>
+                    <div class="col-md-9">
+                        {{ object.elected_country }}
+                        <div class="form-text">The country that the player has chosen to represent in this declaration.</div>
+                    </div>
+                </div>
+
+                <h5 class="card-title">Ancestry</h5>
+            </div>
 
             <table class="table table-striped mb-0">
                 <thead>
@@ -90,8 +95,7 @@
                                         {% for key, value in dirty.items %}
                                             {% if value is not None %}
                                                 <tr>
-                                                    <th class="col-4 col-xs-4">
-                                                    {{ each|fieldname:key|capfirst }}</td>
+                                                    <th class="col-4 col-xs-4">{{ each|fieldname:key|capfirst }}</th>
                                                     <td class="col-4 col-xs-4 text-danger">-</td>
                                                     <td class="col-4 col-xs-4 text-success">{{ value|default_if_none:"-" }}</td>
                                                 </tr>
