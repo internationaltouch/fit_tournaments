@@ -1,0 +1,59 @@
+{% extends "eligibility/player_form.html" %}
+{% load bootstrap5 %}
+
+{% block card_footer %}{% endblock %}
+
+{% block after_footer %}
+    {% if object.pk %}
+        <div class="card-body">
+            <h5 class="card-subtitle mb-3">Ancestry</h5>
+            {% if not object.can_declare_bool %}
+                {% bootstrap_alert object.unable_to_declare_reason alert_type="warning" dismissible=True %}
+            {% endif %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for parent in object.parent_set.all %}
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                {% url 'parent' object.pk parent.pk as parent_url %}
+                                <a href="{{ parent_url }}">{{ parent }}</a>
+                                <span class="badge rounded-pill bg-{{ parent.adopted|yesno:"info,primary" }}">{{ parent.adopted|yesno:"A,B" }}</span>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                {% for grandparent in parent.grandparent_set.all %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {% url 'grandparent' object.pk parent.pk grandparent.pk as grandparent_url %}
+                                        <a href="{{ grandparent_url }}">{{ grandparent }}</a>
+                                        <span class="badge rounded-pill bg-{{ grandparent.adopted|yesno:"info,primary" }}">{{ grandparent.adopted|yesno:"A,B" }}</span>
+                                    </li>
+                                {% empty %}
+                                    <li class="list-group-item">No grandparents entered, please add them.</li>
+                                {% endfor %}
+                            </ul>
+                            <div class="card-footer">
+                                {% url 'grandparent' object.pk parent.pk as create_grandparent_url %}
+                                {% bootstrap_button "Add a grandparent" button_type="link" href=create_grandparent_url button_class="btn-secondary" size="small" %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card-footer">
+            {% bootstrap_button "Save" %}
+
+            {% url 'parent' object.pk as create_parent_url %}
+            {% bootstrap_button "Add a parent" button_type="link" href=create_parent_url button_class="btn-secondary" %}
+
+            {% url 'declaration' object.pk as declaration_url %}
+            {% with extra_classes=object.can_declare_bool|yesno:",disabled" %}
+                {% bootstrap_button "Make declaration" button_type="link" href=declaration_url button_class="btn-secondary" extra_classes=extra_classes %}
+            {% endwith %}
+
+            {% bootstrap_button "Clear" button_type="reset" button_class="btn-secondary" %}
+
+            {% url 'players' as cancel_url %}
+            {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
+        </div>
+    {% endif %}
+{% endblock %}

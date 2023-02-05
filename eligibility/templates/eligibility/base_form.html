@@ -12,11 +12,14 @@
                 {% block after_form %}{% endblock %}
             </div>
             {% block after_body %}{% endblock %}
-            <div class="card-footer">
-                {% bootstrap_button "Save" %}
-                {% bootstrap_button "Clear" button_type="reset" button_class="btn-secondary" %}
-                {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
-            </div>
+            {% block card_footer %}
+                <div class="card-footer">
+                    {% bootstrap_button "Save" %}
+                    {% bootstrap_button "Clear" button_type="reset" button_class="btn-secondary" %}
+                    {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
+                </div>
+            {% endblock %}
+            {% block after_footer %}{% endblock %}
         </form>
     </main>
 {% endblock %}

@@ -38,10 +38,8 @@ class PlayerCreate(LoginRequiredMixin, CreateView):
 
 class PlayerEdit(LoginRequiredMixin, UpdateView):
     model = Player
-
-
-class PlayerDetail(LoginRequiredMixin, DetailView):
-    model = Player
+    form_class = PlayerForm
+    template_name = "eligibility/player_form_detail.html"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context = super().get_context_data(**kwargs)
