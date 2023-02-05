@@ -1,6 +1,8 @@
-{% extends "eligibility/base_form.html" %}
+{% extends "eligibility/parent_form.html" %}
+
+{% block card_title %}{{ object.pk|yesno:"Update,Create" }} Grandparent{% endblock %}
 
 {% block before_form %}
-    <h1>{{ object.pk|yesno:"Update,New" }} parent for {{ parent }}</h1>
-    <h2>{{ object.pk|yesno:"Update,New" }} grand parent for {{ player }}</h2>
+    <h5 class="card-title">{{ object.pk|yesno:"Update,New" }} grandparent for {{ parent.child }}</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Parent for {{ parent }}</h6>
 {% endblock %}

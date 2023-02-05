@@ -17,8 +17,8 @@ class BooleanChoiceField(forms.TypedChoiceField):
     def __init__(self, *args, **kwargs):
         defaults = {
             "choices": [
-                ("1", _("Yes")),
-                ("0", _("No")),
+                ("1", _("Adoptive parent")),
+                ("0", _("Biological parent")),
             ],
             "initial": "0",
             "coerce": boolean_coerce,

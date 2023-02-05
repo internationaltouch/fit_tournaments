@@ -1,5 +1,27 @@
 {% extends "eligibility/base_form.html" %}
+{% load bootstrap5 %}
+
+{% block card_title %}Player Declaration{% endblock %}
 
 {% block before_form %}
-    <h1>New declaration for {{ player }}</h1>
+    <h5 class="card-title">New declaration for {{ player }}</h5>
+    <p>Based on the information you have provided, <strong>{{ player }}</strong> is eligible for
+        {% for each in player.eligible %}{% if forloop.last %}and {% endif %}{{ each }}{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
+    {% if player.declarations.exists %}
+        {% bootstrap_alert "Making a new declaration will supersede your previous declarations." alert_type="warning" %}
+    {% endif %}
+{% endblock %}
+
+{% block after_body %}
+    <ul class="list-group list-group-flush">
+        {% for previous in player.declarations.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ previous.elected_country }} &ndash;
+                {{ previous.timestamp }}
+                {% if not previous.supersceded_by %}
+                    <span class="badge bg-success">Active</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
 {% endblock %}
