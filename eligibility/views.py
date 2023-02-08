@@ -86,7 +86,7 @@ def parent_edit(request, player, pk=None):
         form = ParentForm(instance=instance)
 
     context = {
-        "object": instance,
+        "object": instance if pk is not None else None,
         "form": form,
         "player": child,
         "cancel_url": child.get_absolute_url(),
