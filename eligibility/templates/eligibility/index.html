@@ -29,7 +29,8 @@
                         preliminary squads and final teams.
                     </div>
                     <div class="card-footer">
-                        {% bootstrap_button "Begin" button_type="link" href="#" extra_classes="disabled" %}
+                        {% url 'nations' as nation_portal %}
+                        {% bootstrap_button "Begin" button_type="link" href=nation_portal %}
                     </div>
                 </div>
             </div>

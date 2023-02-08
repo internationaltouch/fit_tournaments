@@ -28,7 +28,7 @@
                         <td><a href="{% url 'player' player.pk %}">{{ player }}</a></td>
                         <td>
                             {% for country in player.eligible %}
-                                {{ country }}{% if not forloop.last %}, {% endif %}
+                                {% if forloop.last %}and {% endif %}{{ country }}{% if not forloop.last %}, {% endif %}
                             {% endfor %}
                         </td>
                         <td>

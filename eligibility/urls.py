@@ -1,7 +1,7 @@
 from django.urls import include, path
 
 from eligibility import views
-from eligibility.views import players
+from eligibility.views import nations, players
 
 player_urls = [
     path("create", players.player_create, name="player"),
@@ -18,4 +18,5 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("players", players.PlayerList.as_view(), name="players"),
     path("players/", include(player_urls)),
+    path("nation", nations.declaration_list, name="nations"),
 ]

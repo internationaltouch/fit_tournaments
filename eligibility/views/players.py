@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -21,7 +22,9 @@ class PlayerList(LoginRequiredMixin, ListView):
     model = Player
 
     def get_queryset(self):
-        return get_objects_for_user(self.request.user, "eligibility.change_player")
+        return get_objects_for_user(
+            self.request.user, "eligibility.change_player", with_superuser=False
+        )
 
 
 @login_required
@@ -122,7 +125,9 @@ def declaration_create(request, player):
     if request.method == "POST":
         form = PlayerDeclarationForm(data=request.POST, instance=instance)
         if form.is_valid():
-            form.save()
+            instance = form.save()
+            group, _ = Group.objects.get_or_create(name=instance.elected_country)
+            assign_perm("eligibility.view_playerdeclaration", group, instance)
             return redirect(reverse("players"))
     else:
         form = PlayerDeclarationForm(instance=instance)
