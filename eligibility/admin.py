@@ -1,5 +1,6 @@
 import nested_admin
 from django.contrib import admin
+from guardian.admin import GuardedModelAdmin, GuardedModelAdminMixin
 from more_admin_filters import RelatedDropdownFilter
 
 from eligibility.filters import (
@@ -48,7 +49,7 @@ class ParentAdmin(nested_admin.NestedModelAdmin):
 
 
 @admin.register(Player)
-class PlayerAdmin(nested_admin.NestedModelAdmin):
+class PlayerAdmin(GuardedModelAdminMixin, nested_admin.NestedModelAdmin):
     list_display = ("name", "date_of_birth", "country_of_birth", "eligible")
     list_filter = (EligibilityListFilter, DecadeBornListFilter)
     inlines = [
@@ -58,7 +59,7 @@ class PlayerAdmin(nested_admin.NestedModelAdmin):
 
 
 @admin.register(PlayerDeclaration)
-class PlayerDeclarationAdmin(admin.ModelAdmin):
+class PlayerDeclarationAdmin(GuardedModelAdmin):
     list_display = ("name", "elected_country", "timestamp", "supersceded_by")
     list_filter = (
         ElectedCountryListFilter,

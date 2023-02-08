@@ -1,16 +1,16 @@
 from typing import Any, Dict
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
-from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 from guardian.decorators import permission_required
-from guardian.shortcuts import get_objects_for_user
+from guardian.shortcuts import assign_perm, get_objects_for_user
 
 from eligibility.forms import (
     GrandParentForm,
@@ -32,14 +32,21 @@ class PlayerList(LoginRequiredMixin, ListView):
         return get_objects_for_user(self.request.user, "eligibility.change_player")
 
 
-class PlayerCreate(LoginRequiredMixin, CreateView):
-    model = Player
-    form_class = PlayerForm
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["cancel_url"] = reverse("players")
-        return context
+@login_required
+def player_create(request):
+    if request.method == "POST":
+        form = PlayerForm(data=request.POST)
+        if form.is_valid():
+            instance = form.save()
+            # XXX: This is really important! Without setting the change
+            #      permission on the newly created object, it will not be
+            #      editable in the player_edit view.
+            assign_perm("eligibility.change_player", request.user, instance)
+            return redirect(instance.get_absolute_url())
+    else:
+        form = PlayerForm()
+    context = {"form": form, "cancel_url": reverse("players")}
+    return TemplateResponse(request, "eligibility/player_form.html", context)
 
 
 @permission_required("eligibility.change_player", (Player, "pk", "pk"))
