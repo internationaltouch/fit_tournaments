@@ -70,40 +70,28 @@ def player_edit(request, pk):
     return TemplateResponse(request, "eligibility/player_form_detail.html", context)
 
 
-class ParentCreate(LoginRequiredMixin, CreateView):
-    model = Parent
-    form_class = ParentForm
+@permission_required("eligibility.change_player", (Player, "pk", "player"))
+def parent_edit(request, player, pk=None):
+    child = get_object_or_404(Player, pk=player)
+    if pk is None:
+        instance = Parent(child=child)
+    else:
+        instance = get_object_or_404(child.parent_set, pk=pk)
+    if request.method == "POST":
+        form = ParentForm(data=request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect(child.get_absolute_url())
+    else:
+        form = ParentForm(instance=instance)
 
-    def get_success_url(self) -> str:
-        return reverse("player", args=(self.kwargs["player"],))
-
-    def get_form_kwargs(self) -> Dict[str, Any]:
-        kwargs = super().get_form_kwargs()
-        player = get_object_or_404(Player, pk=self.kwargs["player"])
-        kwargs["instance"] = Parent(child=player)
-        return kwargs
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        player = context["form"].instance.child
-        context["player"] = player
-        context["cancel_url"] = reverse("player", args=(player.pk,))
-        return context
-
-
-class ParentEdit(LoginRequiredMixin, UpdateView):
-    model = Parent
-    form_class = ParentForm
-
-    def get_success_url(self) -> str:
-        return reverse("player", args=(self.kwargs["player"],))
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        player = context["form"].instance.child
-        context["player"] = player
-        context["cancel_url"] = reverse("player", args=(player.pk,))
-        return context
+    context = {
+        "object": instance,
+        "form": form,
+        "player": child,
+        "cancel_url": child.get_absolute_url(),
+    }
+    return TemplateResponse(request, "eligibility/parent_form.html", context)
 
 
 class GrandParentCreate(LoginRequiredMixin, CreateView):
