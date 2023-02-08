@@ -1,14 +1,10 @@
-from typing import Any, Dict
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http.response import Http404
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
-from django.urls import reverse, reverse_lazy
-from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView
-from django.views.generic.list import ListView
+from django.urls import reverse
+from django.views.generic import DetailView, ListView
 from guardian.decorators import permission_required
 from guardian.shortcuts import assign_perm, get_objects_for_user
 
@@ -19,10 +15,6 @@ from eligibility.forms import (
     PlayerForm,
 )
 from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
-
-
-def index(request):
-    return TemplateResponse(request, "eligibility/index.html")
 
 
 class PlayerList(LoginRequiredMixin, ListView):
