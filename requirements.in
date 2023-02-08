@@ -1,6 +1,7 @@
 django-bootstrap-v5
 django-dirtyfields
 django-environ
+django-guardian
 django-htmx
 django-more-admin-filters
 django-nested-admin

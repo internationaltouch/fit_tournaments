@@ -2,12 +2,15 @@ from typing import Any, Dict
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import Http404
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
+from guardian.decorators import permission_required
+from guardian.shortcuts import get_objects_for_user
 
 from eligibility.forms import (
     GrandParentForm,
@@ -25,6 +28,9 @@ def index(request):
 class PlayerList(LoginRequiredMixin, ListView):
     model = Player
 
+    def get_queryset(self):
+        return get_objects_for_user(self.request.user, "eligibility.change_player")
+
 
 class PlayerCreate(LoginRequiredMixin, CreateView):
     model = Player
@@ -36,18 +42,25 @@ class PlayerCreate(LoginRequiredMixin, CreateView):
         return context
 
 
-class PlayerEdit(LoginRequiredMixin, UpdateView):
-    model = Player
-    form_class = PlayerForm
-    template_name = "eligibility/player_form_detail.html"
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        try:
-            self.object.can_declare()
-        except ValueError as exc:
-            context["declaration"] = str(exc)
-        return context
+@permission_required("eligibility.change_player", (Player, "pk", "pk"))
+def player_edit(request, pk):
+    instance = get_object_or_404(Player, pk=pk)
+    if request.method == "POST":
+        form = PlayerForm(data=request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse("players"))
+    else:
+        form = PlayerForm(instance=instance)
+    context = {
+        "object": instance,
+        "form": form,
+    }
+    try:
+        instance.can_declare()
+    except ValueError as exc:
+        context["declaration"] = str(exc)
+    return TemplateResponse(request, "eligibility/player_form_detail.html", context)
 
 
 class ParentCreate(LoginRequiredMixin, CreateView):
