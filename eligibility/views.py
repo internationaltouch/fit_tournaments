@@ -94,41 +94,30 @@ def parent_edit(request, player, pk=None):
     return TemplateResponse(request, "eligibility/parent_form.html", context)
 
 
-class GrandParentCreate(LoginRequiredMixin, CreateView):
-    model = GrandParent
-    form_class = GrandParentForm
+@permission_required("eligibility.change_player", (Player, "pk", "player"))
+def grandparent_edit(request, player, parent, pk=None):
+    grandchild = get_object_or_404(Player, pk=player)
+    child = get_object_or_404(grandchild.parent_set, pk=parent)
+    if pk is None:
+        instance = GrandParent(child=child)
+    else:
+        instance = get_object_or_404(child.grandparent_set, pk=pk)
+    if request.method == "POST":
+        form = GrandParentForm(data=request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect(grandchild.get_absolute_url())
+    else:
+        form = GrandParentForm(instance=instance)
 
-    def get_success_url(self) -> str:
-        return reverse("player", args=(self.kwargs["player"],))
-
-    def get_form_kwargs(self) -> Dict[str, Any]:
-        kwargs = super().get_form_kwargs()
-        parent = get_object_or_404(Parent, pk=self.kwargs["parent"])
-        kwargs["instance"] = GrandParent(child=parent)
-        return kwargs
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        parent = context["form"].instance.child
-        context["parent"] = parent
-        context["cancel_url"] = reverse("player", args=(parent.child.pk,))
-        return context
-
-
-class GrandParentEdit(LoginRequiredMixin, UpdateView):
-    model = GrandParent
-    form_class = GrandParentForm
-
-    def get_success_url(self) -> str:
-        return reverse("player", args=(self.kwargs["player"],))
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        parent = context["form"].instance.child
-        context["parent"] = parent
-        context["player"] = parent.child
-        context["cancel_url"] = reverse("player", args=(parent.child.pk,))
-        return context
+    context = {
+        "object": instance if pk is not None else None,
+        "form": form,
+        "parent": child,
+        "player": grandchild,
+        "cancel_url": grandchild.get_absolute_url(),
+    }
+    return TemplateResponse(request, "eligibility/grandparent_form.html", context)
 
 
 class PlayerDeclarationCreate(LoginRequiredMixin, CreateView):
