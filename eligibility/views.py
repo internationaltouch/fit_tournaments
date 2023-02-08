@@ -120,30 +120,27 @@ def grandparent_edit(request, player, parent, pk=None):
     return TemplateResponse(request, "eligibility/grandparent_form.html", context)
 
 
-class PlayerDeclarationCreate(LoginRequiredMixin, CreateView):
-    model = PlayerDeclaration
-    form_class = PlayerDeclarationForm
-    success_url = reverse_lazy("players")
-
-    def get_form_kwargs(self) -> Dict[str, Any]:
-        kwargs = super().get_form_kwargs()
-        player = get_object_or_404(Player, pk=self.kwargs["player"])
-        try:
-            player.can_declare()
-        except ValueError as exc:
-            raise Http404(
-                f"Unable to make player declaration for {player}: {exc}"
-            ) from exc
-        if kwargs["instance"] is None:
-            kwargs["instance"] = PlayerDeclaration(player=player)
-        return kwargs
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        player = context["form"].instance.player
-        context["player"] = player
-        context["cancel_url"] = reverse("player", args=(player.pk,))
-        return context
+def declaration_create(request, player):
+    player = get_object_or_404(Player, pk=player)
+    try:
+        player.can_declare()
+    except ValueError as exc:
+        raise Http404(f"Unable to make player declaration for {player}: {exc}") from exc
+    instance = PlayerDeclaration(player=player)
+    if request.method == "POST":
+        form = PlayerDeclarationForm(data=request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse("players"))
+    else:
+        form = PlayerDeclarationForm(instance=instance)
+    context = {
+        "object": instance,
+        "form": form,
+        "player": player,
+        "cancel_url": player.get_absolute_url(),
+    }
+    return TemplateResponse(request, "eligibility/playerdeclaration_form.html", context)
 
 
 class PlayerDeclarationView(LoginRequiredMixin, DetailView):
