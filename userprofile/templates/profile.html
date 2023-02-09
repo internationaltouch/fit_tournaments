@@ -1,36 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>{{ user }}</title>
-</head>
-<body>
+{% extends "simple.html" %}
+{% load bootstrap5 %}
 
-<h1>{{ user }}</h1>
+{% block card_title %}Profile{% endblock %}
 
-{% if backends.not_associated %}
-    <p>In case you lose access to your existing linked social account{{ backends.associated|pluralize }},
-        you can link another from the services below.</p>
-    <ul>
-        {% for backend in backends.not_associated %}
-            <li><a href="{% url 'social:begin' backend %}">{{ backend }}</a></li>
-        {% endfor %}
-    </ul>
-{% endif %}
+{% block card_body %}
+    <h4 class="card-title">{{ user.get_full_name }}</h4>
 
-{% if backends.associated.count > 1 %}
-    <p>You are connected using the following social accounts, you can disconnect all but one of them.</p>
-    <div>
-        {% for backend in backends.associated %}
-            <form action="{% url 'social:disconnect_individual' backend.provider backend.pk %}" method="post"
-                  style="display: inline;">
-                {% csrf_token %}
-                <button type="submit">Disconnect {{ backend.provider }}</button>
-            </form>
-        {% endfor %}
-    </div>
-{% else %}
-    <p>Unable to disconnect from your only social profile <strong>{{ backends.associated.first.provider }}</strong>.</p>
-{% endif %}
+    {% if backends.not_associated %}
+        <p>In case you lose access to your existing linked social account{{ backends.associated|pluralize }},
+            you can link another from the services below.</p>
 
-</body>
-</html>
+        {% buttons %}
+            {% if "facebook" in backends.not_associated %}
+                {% url "social:begin" "facebook" as facebook_url %}
+                {% bootstrap_button "Facebook" button_type="link" href=facebook_url button_class="btn-success" %}
+            {% endif %}
+
+            {% if "linkedin-oauth2" in backends.not_associated %}
+                {% url "social:begin" "linkedin-oauth2" as linkedin_url %}
+                {% bootstrap_button "LinkedIn" button_type="link" href=linkedin_url button_class="btn-success" %}
+            {% endif %}
+        {% endbuttons %}
+    {% endif %}
+
+    {% if backends.associated.count > 1 %}
+        <p>You are connected using the following social accounts, you can disconnect all but one of them.</p>
+        {% buttons %}
+            {% for backend in backends.associated %}
+                <form action="{% url "social:disconnect_individual" backend.provider backend.pk %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    {% if backend.provider == "linkedin-oauth2" %}
+                        {% bootstrap_button "LinkedIn" button_class="btn-danger" %}
+                    {% else %}
+                        {% bootstrap_button backend.provider|title button_class="btn-danger" %}
+                    {% endif %}
+                </form>
+            {% endfor %}
+        {% endbuttons %}
+    {% endif %}
+{% endblock %}
+
+{% block card_buttons %}
+    {% url 'players' as player_portal %}
+    {% bootstrap_button "Player Portal" button_type="link" href=player_portal %}
+    {% url 'nations' as nation_portal %}
+    {% if user.groups.exists %}
+        {% bootstrap_button "Administrator Portal" button_type="link" href=nation_portal button_class="btn-secondary" %}
+    {% endif %}
+{% endblock %}

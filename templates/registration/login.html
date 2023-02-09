@@ -1,11 +1,16 @@
-{% extends "registration/base.html" %}
+{% extends "simple.html" %}
+{% load bootstrap5 %}
 
-{% block container %}
+{% block card_title %}Login{% endblock %}
 
-<h1>Login</h1>
+{% block card_body %}
+    <p>Please choose from one the following social networks to log in to this portal.</p>
+    {% buttons %}
+        {% url 'social:begin' 'facebook' as facebook_url %}
+        {% bootstrap_button "Facebook" button_type="link" href=facebook_url %}
 
-{% for each in backends.not_associated %}
-    <p><a href="{% url 'social:begin' each %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">{{ each }}</a></p>
-{% endfor %}
-
-{% endblock container %}
+        {% url 'social:begin' 'linkedin-oauth2' as linkedin_url %}
+        {% bootstrap_button "LinkedIn" button_type="link" href=linkedin_url %}
+    {% endbuttons %}
+    <p>If you do not have an account yet, one will be provided when you're redirected back.</p>
+{% endblock card_body %}

@@ -1,0 +1,10 @@
+{% extends "simple.html" %}
+
+{% block card_title %}Administrator Portal{% endblock %}
+{% block card_body %}
+    <p>Sorry {{ user.first_name }}, you don't have permission to access this section.</p>
+
+    {% with "webmaster@tournaments.fit" as email %}
+        <p class="mb-0">If you are a nation administrator, please email {{ email|urlize }} to request access.</p>
+    {% endwith %}
+{% endblock %}

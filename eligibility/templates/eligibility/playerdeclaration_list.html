@@ -1,4 +1,4 @@
-{% extends "eligibility/base.html" %}
+{% extends "base.html" %}
 {% load bootstrap5 %}
 
 {% block container %}
@@ -6,11 +6,31 @@
         <div class="card mb-3">
             <h4 class="card-header text-center">Administrator Portal</h4>
             <div class="card-body">
-                <p>In the <em>Administrator Portal</em>, ...
+                <p>In the <em>Administrator Portal</em>, nation representatives review the declarations made by
+                    individual players in the <em>Player Portal</em> where they elect which nation they wish to
+                    represent in upcoming international events, in accordance with the
                     <a href="https://docs.internationaltouch.org/policy/player-eligibility/">FIT&nbsp;Player&nbsp;Eligibility&nbsp;Policy</a>.
                 </p>
 
-                <p class="mb-0">...</p>
+                <p>It is the responsibility of the nation representatives to:</p>
+
+                <ol>
+                    <li>Sight documentation from the player to ensure that they have not made a false or misleading statement; and</li>
+                    <li>Record the type of documents that were sighted in support of each part of the eligibility declaration.</li>
+                </ol>
+
+                <p>Tier-One nations must notify FIT which</p>
+
+                <ol>
+                    <li>Dual-qualified players have been selected for the international event squads a <strong>minimum
+                        of three months</strong> prior to final nominations for the international event; and</li>
+                    <li>Dual-qualified players have been selected for the international event final squads a
+                        <strong>minimum of two weeks</strong> prior to the closing date for final nominations.</li>
+                </ol>
+
+                <p class="mb-0">Welcome {{ request.user.first_name }} &mdash; you are viewing declarations
+                    for {% for group in request.user.groups.all|dictsort:"name" %}{% if not forloop.first and forloop.last %}and
+                    {% endif %}{{ group }}{% if not forloop.last %}, {% endif %}{% endfor %}.</p>
             </div>
             <table class="table table-fixed table-striped align-middle mb-0">
                 <thead>
@@ -27,7 +47,8 @@
                             <td><a href="{% url 'player' player.pk %}">{{ player }}</a></td>
                             <td>
                                 {% for country in declaration.eligible_for %}
-                                    {% if forloop.last %}and {% endif %}{% if country == declaration.elected_country.name %}<strong>{{ country }}</strong>{% else %}
+                                    {% if not forloop.first and forloop.last %}and
+                                    {% endif %}{% if country == declaration.elected_country.name %}<strong>{{ country }}</strong>{% else %}
                                     {{ country }}{% endif %}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}
                             </td>

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load bootstrap5 %}
+
+{% block container %}
+    <main class="mt-3">
+        <div class="card mb-3">
+            <h4 class="card-header text-center">{% block card_title %}{% endblock %}</h4>
+            <div class="card-body">
+                {% block card_body %}{% endblock %}
+            </div>
+            <div class="card-footer">
+                {% block card_buttons %}{% endblock %}
+                {% url 'index' as cancel_url %}
+                {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
+            </div>
+        </div>
+    </main>
+{% endblock %}
