@@ -200,6 +200,19 @@ AUTHENTICATION_BACKENDS = (
     "guardian.backends.ObjectPermissionBackend",
 )
 
+LOGOUT_REDIRECT_URL = "/"
+
+
+# Impersonate
+# https://pypi.org/project/django-impersonate/
+
+IMPERSONATE = {
+    # "MAX_DURATION": 300,
+    "PAGINATE_COUNT": 25,
+    "READ_ONLY": True,
+    "REDIRECT_URL": "/",
+}
+
 
 # Logging
 

@@ -1,0 +1,28 @@
+{% extends "simple.html" %}
+{% load bootstrap5 %}
+
+{% block card_title %}Impersonate{% endblock %}
+
+{% block card_body %}
+    {% if page.object_list %}
+        <p>Please select the user you wish to impersonate from the list below.</p>
+        <ul class="list-group mb-3">
+            {% for user in page.object_list %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url "impersonate-start" user.pk %}{{ redirect }}">{{ user.get_full_name|default:user }}</a>
+                    <span class="badge bg-{{ user.email|yesno:"info,danger" }}">{{ user.email|default:"No email" }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+        {% with request.path|add:"?"|add:request.GET.urlencode as result_url %}
+            {% bootstrap_pagination page url=result_url size="small" %}
+        {% endwith %}
+    {% else %}
+        {% bootstrap_alert "There are no users that you can impersonate." alert_type="danger" %}
+    {% endif %}
+{% endblock card_body %}
+
+{% block card_buttons %}
+    {% url "impersonate-search" as search_url %}
+    {% bootstrap_button "Search" button_type="link" href=search_url %}
+{% endblock card_buttons %}

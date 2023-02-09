@@ -47,4 +47,6 @@
     {% if user.groups.exists %}
         {% bootstrap_button "Administrator Portal" button_type="link" href=nation_portal button_class="btn-secondary" %}
     {% endif %}
+    {% url 'logout' as logout_url %}
+    {% bootstrap_button "Logout" button_type="link" href=logout_url button_class="btn-secondary" %}
 {% endblock %}

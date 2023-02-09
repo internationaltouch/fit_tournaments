@@ -48,9 +48,16 @@
     <div class="container">
         <p class="float-end mb-1"><a href="#">Back to top</a></p>
         <p class="mb-1">&copy; Federation of International Touch Limited.</p>
-        <p class="mb-0">
+        <p>
             [ <a href="https://www.internationaltouch.org/privacy-policy/">Privacy Policy</a> | <a href="https://www.internationaltouch.org/terms-conditions/">Terms &amp; Conditions</a> ]
         </p>
+        {% if user.is_impersonate %}
+            {% url "impersonate-stop" as stop_url %}
+            {% bootstrap_button "Stop Impersonating" button_type="link" href=stop_url size="small" button_class="btn-danger" %}
+        {% elif user.is_staff %}
+            {% url "impersonate-list" as list_url %}
+            {% bootstrap_button "Impersonate" button_type="link" href=list_url size="small" button_class="btn-warning" %}
+        {% endif %}
     </div>
 </footer>
 
