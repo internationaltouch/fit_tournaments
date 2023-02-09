@@ -16,14 +16,20 @@
                         <div class="card">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 {% url 'parent' object.pk parent.pk as parent_url %}
-                                <a href="{{ parent_url }}">{{ parent }}</a>
+                                <span>
+                                    <a href="{{ parent_url }}">{{ parent }}</a>
+                                    <span class="badge bg-info">{{ parent.birthplace }}</span>
+                                </span>
                                 <span class="badge rounded-pill bg-{{ parent.adopted|yesno:"info,primary" }}">{{ parent.adopted|yesno:"A,B" }}</span>
                             </div>
                             <ul class="list-group list-group-flush">
                                 {% for grandparent in parent.grandparent_set.all %}
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         {% url 'grandparent' object.pk parent.pk grandparent.pk as grandparent_url %}
-                                        <a href="{{ grandparent_url }}">{{ grandparent }}</a>
+                                        <span>
+                                            <a href="{{ grandparent_url }}">{{ grandparent }}</a>
+                                            <span class="badge bg-info">{{ grandparent.birthplace }}</span>
+                                        </span>
                                         <span class="badge rounded-pill bg-{{ grandparent.adopted|yesno:"info,primary" }}">{{ grandparent.adopted|yesno:"A,B" }}</span>
                                     </li>
                                 {% empty %}
