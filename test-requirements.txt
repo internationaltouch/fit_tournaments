@@ -54,6 +54,8 @@ django-guardian==2.4.0
     # via -r requirements.txt
 django-htmx==1.13.0
     # via -r requirements.txt
+django-impersonate==1.8.2
+    # via -r requirements.txt
 django-more-admin-filters==1.3
     # via -r requirements.txt
 django-nested-admin==4.0.2

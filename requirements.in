@@ -3,6 +3,7 @@ django-dirtyfields
 django-environ
 django-guardian
 django-htmx
+django-impersonate
 django-more-admin-filters
 django-nested-admin
 django-querycount
