@@ -24,8 +24,15 @@
                 </thead>
                 <tbody>
                 {% for player in player_list %}
-                    <tr>
-                        <td><a href="{% url 'player' player.pk %}">{{ player }}</a></td>
+                    <tr class="table-{% if not player.can_declare_bool %}danger{% elif not player.declarations.exists %}warning{% else %}default{% endif %}">
+                        <td>
+                            <a href="{% url 'player' player.pk %}">{{ player }}</a>
+                            {% if not player.declarations.exists and player.eligible|length > 1 %}
+                                &nbsp;<span class="badge bg-danger">Declaration required</span>
+                            {% elif not player.can_declare_bool %}
+                                &nbsp;<span class="badge bg-danger">Insufficient data</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% for country in player.eligible %}
                                 {% if not forloop.first and forloop.last %}and {% endif %}{{ country }}{% if not forloop.last %}, {% endif %}
