@@ -20,6 +20,11 @@
                 {% url "social:begin" "linkedin-oauth2" as linkedin_url %}
                 {% bootstrap_button "LinkedIn" button_type="link" href=linkedin_url button_class="btn-success" %}
             {% endif %}
+
+            {% if "twitter" in backends.not_associated %}
+                {% url "social:begin" "twitter" as twitter_url %}
+                {% bootstrap_button "Twitter" button_type="link" href=twitter_url button_class="btn-success" %}
+            {% endif %}
         {% endbuttons %}
     {% endif %}
 

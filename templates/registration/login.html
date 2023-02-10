@@ -11,6 +11,9 @@
 
         {% url 'social:begin' 'linkedin-oauth2' as linkedin_url %}
         {% bootstrap_button "LinkedIn" button_type="link" href=linkedin_url %}
+
+        {% url 'social:begin' 'twitter' as twitter_url %}
+        {% bootstrap_button "Twitter" button_type="link" href=twitter_url %}
     {% endbuttons %}
     <p>If you do not have an account yet, one will be provided when you're redirected back.</p>
 {% endblock card_body %}

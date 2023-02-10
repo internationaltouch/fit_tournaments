@@ -193,9 +193,13 @@ SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [
     ("emailAddress", "email_address"),
 ]
 
+SOCIAL_AUTH_TWITTER_KEY = env("TWITTER_KEY", default="")
+SOCIAL_AUTH_TWITTER_SECRET = env("TWITTER_SECRET", default="")
+
 AUTHENTICATION_BACKENDS = (
     "social_core.backends.facebook.FacebookOAuth2",
     "social_core.backends.linkedin.LinkedinOAuth2",
+    "social_core.backends.twitter.TwitterOAuth",
     "django.contrib.auth.backends.ModelBackend",
     "guardian.backends.ObjectPermissionBackend",
 )
