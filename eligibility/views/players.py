@@ -115,6 +115,7 @@ def grandparent_edit(request, player, parent, pk=None):
     return TemplateResponse(request, "eligibility/grandparent_form.html", context)
 
 
+@permission_required("eligibility.change_player", (Player, "pk", "player"))
 def declaration_create(request, player):
     player = get_object_or_404(Player, pk=player)
     try:
