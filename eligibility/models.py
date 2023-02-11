@@ -122,6 +122,9 @@ class Parent(Person):
 
     objects = PersonManager()
 
+    class Meta:
+        unique_together = ("child", "name")
+
 
 class GrandParent(Person):
     child = models.ForeignKey(Parent, on_delete=models.PROTECT)
@@ -134,6 +137,7 @@ class GrandParent(Person):
 
     class Meta:
         verbose_name = "grandparent"
+        unique_together = ("child", "name")
 
 
 class PlayerDeclaration(models.Model):
