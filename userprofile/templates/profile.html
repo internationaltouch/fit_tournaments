@@ -21,6 +21,11 @@
                 {% bootstrap_button "Facebook" button_type="link" href=facebook_url button_class="btn-success" %}
             {% endif %}
 
+            {% if "github" in backends.not_associated %}
+                {% url "social:begin" "github" as github_url %}
+                {% bootstrap_button "GitHub" button_type="link" href=github_url button_class="btn-success" %}
+            {% endif %}
+
             {% if "linkedin-oauth2" in backends.not_associated %}
                 {% url "social:begin" "linkedin-oauth2" as linkedin_url %}
                 {% bootstrap_button "LinkedIn" button_type="link" href=linkedin_url button_class="btn-success" %}
@@ -46,6 +51,8 @@
                         {% bootstrap_button "Google" button_class="btn-danger" %}
                     {% elif backend.provider == "linkedin-oauth2" %}
                         {% bootstrap_button "LinkedIn" button_class="btn-danger" %}
+                    {% elif backend.provider == "github" %}
+                        {% bootstrap_button "GitHub" button_class="btn-danger" %}
                     {% else %}
                         {% bootstrap_button backend.provider|title button_class="btn-danger" %}
                     {% endif %}

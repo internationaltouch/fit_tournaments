@@ -203,11 +203,15 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     "https://www.googleapis.com/auth/userinfo.email",
 ]
 
+SOCIAL_AUTH_GITHUB_KEY = env("GITHUB_KEY", default="")
+SOCIAL_AUTH_GITHUB_SECRET = env("GITHUB_SECRET", default="")
+
 AUTHENTICATION_BACKENDS = (
     "social_core.backends.google.GoogleOAuth2",
     "social_core.backends.facebook.FacebookOAuth2",
     "social_core.backends.linkedin.LinkedinOAuth2",
-    "social_core.backends.twitter.TwitterOAuth",
+    # "social_core.backends.twitter.TwitterOAuth",
+    "social_core.backends.github.GithubOAuth2",
     "django.contrib.auth.backends.ModelBackend",
     "guardian.backends.ObjectPermissionBackend",
 )

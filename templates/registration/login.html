@@ -12,6 +12,9 @@
         {% url 'social:begin' 'facebook' as facebook_url %}
         {% bootstrap_button "Facebook" button_type="link" href=facebook_url %}
 
+        {% url 'social:begin' 'github' as github_url %}
+        {% bootstrap_button "GitHub" button_type="link" href=github_url %}
+
         {% url 'social:begin' 'linkedin-oauth2' as linkedin_url %}
         {% bootstrap_button "LinkedIn" button_type="link" href=linkedin_url %}
 
