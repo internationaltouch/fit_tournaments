@@ -19,7 +19,7 @@
                 <div class="mb-3 row">
                     <h5 class="col-md-3 col-form-label">Submitted by</h5>
                     <div class="col-md-9">
-                        <span class="badge bg-warning">To be implemented</span>
+                        {{ object.author.get_full_name }} &mdash; {{ object.author.email|urlize }}
                         <div class="form-text">The user of the system who made the declaration.</div>
                     </div>
                 </div>

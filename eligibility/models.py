@@ -2,6 +2,7 @@ import uuid
 from typing import Any, List
 
 from dirtyfields import DirtyFieldsMixin
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -144,6 +145,13 @@ class PlayerDeclaration(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     player = models.ForeignKey(
         Player, related_name="declarations", on_delete=models.CASCADE
+    )
+    author = models.ForeignKey(
+        get_user_model(),
+        editable=False,
+        related_name="declarations",
+        on_delete=models.PROTECT,
+        help_text="The user who made this declaration for the player."
     )
     timestamp = models.DateTimeField(
         auto_now_add=True,

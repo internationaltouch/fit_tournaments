@@ -122,7 +122,7 @@ def declaration_create(request, player):
         player.can_declare()
     except ValueError as exc:
         raise Http404(f"Unable to make player declaration for {player}: {exc}") from exc
-    instance = PlayerDeclaration(player=player)
+    instance = PlayerDeclaration(player=player, author=request.user)
     if request.method == "POST":
         form = PlayerDeclarationForm(data=request.POST, instance=instance)
         if form.is_valid():

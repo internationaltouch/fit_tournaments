@@ -60,18 +60,26 @@ class PlayerAdmin(GuardedModelAdminMixin, nested_admin.NestedModelAdmin):
 
 @admin.register(PlayerDeclaration)
 class PlayerDeclarationAdmin(GuardedModelAdmin):
-    list_display = ("name", "elected_country", "timestamp", "supersceded_by")
+    list_display = ("name", "author", "elected_country", "timestamp", "supersceded_by")
     list_filter = (
         ElectedCountryListFilter,
         IsSuperscededListFilter.init("is_supersceded"),
         ("player", RelatedDropdownFilter),
+        ("author", RelatedDropdownFilter),
     )
     fields = (
         "player",
         "name",
+        "author",
         "eligible_for",
         "elected_country",
         "supersceded_by",
         "data",
     )
-    readonly_fields = ("name", "eligible_for", "supersceded_by", "data")
+    readonly_fields = (
+        "name",
+        "author",
+        "eligible_for",
+        "supersceded_by",
+        "data",
+    )

@@ -13,13 +13,25 @@ class PlayerForm(forms.ModelForm):
 class ParentForm(ModelForm):
     class Meta:
         model = Parent
-        fields = ("name", "date_of_birth", "country_of_birth", "country_of_birth_other", "adopted")
+        fields = (
+            "name",
+            "date_of_birth",
+            "country_of_birth",
+            "country_of_birth_other",
+            "adopted",
+        )
 
 
 class GrandParentForm(ModelForm):
     class Meta:
         model = GrandParent
-        fields = ("name", "date_of_birth", "country_of_birth", "country_of_birth_other", "adopted")
+        fields = (
+            "name",
+            "date_of_birth",
+            "country_of_birth",
+            "country_of_birth_other",
+            "adopted",
+        )
 
 
 class PlayerDeclarationForm(forms.ModelForm):
