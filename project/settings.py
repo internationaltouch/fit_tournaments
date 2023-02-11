@@ -196,7 +196,15 @@ SOCIAL_AUTH_LINKEDIN_OAUTH2_EXTRA_DATA = [
 SOCIAL_AUTH_TWITTER_KEY = env("TWITTER_KEY", default="")
 SOCIAL_AUTH_TWITTER_SECRET = env("TWITTER_SECRET", default="")
 
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("GOOGLE_KEY", default="")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env("GOOGLE_SECRET", default="")
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/userinfo.email",
+]
+
 AUTHENTICATION_BACKENDS = (
+    "social_core.backends.google.GoogleOAuth2",
     "social_core.backends.facebook.FacebookOAuth2",
     "social_core.backends.linkedin.LinkedinOAuth2",
     "social_core.backends.twitter.TwitterOAuth",

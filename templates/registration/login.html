@@ -6,6 +6,9 @@
 {% block card_body %}
     <p>Please choose from one the following social networks to log in to this portal.</p>
     {% buttons %}
+        {% url 'social:begin' 'google-oauth2' as google_url %}
+        {% bootstrap_button "Google" button_type="link" href=google_url %}
+
         {% url 'social:begin' 'facebook' as facebook_url %}
         {% bootstrap_button "Facebook" button_type="link" href=facebook_url %}
 

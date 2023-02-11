@@ -11,6 +11,11 @@
             you can link another from the services below.</p>
 
         {% buttons %}
+            {% if "google-oauth2" in backends.not_associated %}
+                {% url "social:begin" "google-oauth2" as google_url %}
+                {% bootstrap_button "Google" button_type="link" href=google_url button_class="btn-success" %}
+            {% endif %}
+
             {% if "facebook" in backends.not_associated %}
                 {% url "social:begin" "facebook" as facebook_url %}
                 {% bootstrap_button "Facebook" button_type="link" href=facebook_url button_class="btn-success" %}
@@ -36,7 +41,10 @@
             {% for backend in backends.associated %}
                 <form action="{% url "social:disconnect_individual" backend.provider backend.pk %}" method="post" style="display: inline;">
                     {% csrf_token %}
-                    {% if backend.provider == "linkedin-oauth2" %}
+                    <!-- backend.uid="{{ backend.uid }}" -->
+                    {% if backend.provider == "google-oauth2" %}
+                        {% bootstrap_button "Google" button_class="btn-danger" %}
+                    {% elif backend.provider == "linkedin-oauth2" %}
                         {% bootstrap_button "LinkedIn" button_class="btn-danger" %}
                     {% else %}
                         {% bootstrap_button backend.provider|title button_class="btn-danger" %}
