@@ -1,14 +1,15 @@
+django
 django-bootstrap-v5
 django-dirtyfields
 django-environ
 django-guardian
 django-htmx
 django-impersonate
+django-modelforms
 django-more-admin-filters
 django-nested-admin
 django-querycount
 django-sslserver
-django~=3.2
 gunicorn
 pip-tools
 psycopg2

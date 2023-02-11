@@ -1,28 +1,28 @@
 from django import forms
 
-from eligibility.mixins import BootstrapFormControlMixin
 from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
+from modelforms.forms import ModelForm
 
 
-class PlayerForm(BootstrapFormControlMixin, forms.ModelForm):
+class PlayerForm(forms.ModelForm):
     class Meta:
         model = Player
         fields = "__all__"
 
 
-class ParentForm(forms.ModelForm):
+class ParentForm(ModelForm):
     class Meta:
         model = Parent
         fields = ("name", "date_of_birth", "country_of_birth", "country_of_birth_other", "adopted")
 
 
-class GrandParentForm(BootstrapFormControlMixin, forms.ModelForm):
+class GrandParentForm(ModelForm):
     class Meta:
         model = GrandParent
         fields = ("name", "date_of_birth", "country_of_birth", "country_of_birth_other", "adopted")
 
 
-class PlayerDeclarationForm(BootstrapFormControlMixin, forms.ModelForm):
+class PlayerDeclarationForm(forms.ModelForm):
     class Meta:
         model = PlayerDeclaration
         fields = ("elected_country",)
