@@ -1,11 +1,8 @@
 from django import forms
-from django.core.exceptions import ValidationError
-from django.forms import BaseFormSet, formset_factory, inlineformset_factory
+from django.forms import BaseFormSet
 from modelforms.forms import ModelForm
 
-from eligibility.fields import BooleanChoiceField
-from eligibility.models import GrandParent, Parent, Person, Player, PlayerDeclaration
-from eligibility.utils import boolean_coerce
+from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
 
 
 class PlayerForm(forms.ModelForm):
@@ -69,29 +66,20 @@ class SightingFormSet(BaseFormSet):
 
     def add_fields(self, form, index):
         super().add_fields(form, index)
+
+        person = self.people[index]
+        help_text = f"Note the documentation you viewed that demonstrates {person} "
+
         if index:
-            form.fields[
-                "evidence"
-            ].label = (
-                f"{self.people[index]} was born in {self.people[index].birthplace}"
-            )
-            form.fields["evidence"].help_text = (
-                f"Note the documentation you viewed that demonstrates {self.people[index]} "
-                f"was born in {self.people[index].birthplace}."
-            )
-            form.fields["evidence"].widget.attrs[
-                "placeholder"
-            ] = "Examples: birth certificate, passport, etc"
+            label = f"{person} was born in {person.birthplace}"
+            placeholder = "Examples: birth certificate, passport, etc"
+            help_text += f"was born in {person.birthplace}."
         else:
-            form.fields[
-                "evidence"
-            ].label = (
-                f"{self.people[index]} is a resident of {self.people[index].residency}"
-            )
-            form.fields["evidence"].help_text = (
-                f"Note the documentation you viewed that demonstrates {self.people[index]} "
-                f"is a resident of {self.people[index].residency}, including dates."
-            )
-            form.fields["evidence"].widget.attrs[
-                "placeholder"
-            ] = "Examples: rental statements, utility bills, etc"
+            label = f"{person} is a resident of {person.residency}"
+            placeholder = "Examples: rental statements, utility bills, etc"
+            help_text += f"is a resident of {person.residency}, including dates."
+
+        field = form.fields["evidence"]
+        field.label = label
+        field.widget.attrs["placeholder"] = placeholder
+        field.help_text = help_text
