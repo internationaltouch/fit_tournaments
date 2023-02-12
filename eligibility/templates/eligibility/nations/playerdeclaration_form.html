@@ -1,0 +1,25 @@
+{% extends "eligibility/base_formset.html" %}
+{% load bootstrap5 %}
+
+{% block card_title %}Evidence Check{% endblock %}
+
+{% block before_form %}
+    <h5 class="card-title">{{ player }}</h5>
+    <p>In a declaration made at {{ object.timestamp }}, <strong>{{ player }}</strong> has indicated that they are eligible for
+        {% for each in player.eligible %}{% if forloop.last %}and {% endif %}{{ each }}{% if not forloop.last %}, {% endif %}{% endfor %},
+        and that they wish to represent <strong>{{ object.elected_country }}</strong> in upcoming international competitions.</p>
+    <p>Each nation must confirm the correctness of the information provided before they select them into their squads or teams.</p>
+{% endblock before_form %}
+
+{% block after_form %}
+    <figure class="text-end">
+        <blockquote class="blockquote">
+            <p>The burden of proof in establishing eligibility is on the player and the nation they wish to represent.
+                If a player plays for an international match for a national team that he/she is not eligible to
+                represent both the player and the national team that selected him/her may be guilty of misconduct.</p>
+        </blockquote>
+        <figcaption class="blockquote-footer">
+            Clause 2.7 of <cite title="FIT Player Eligibility Policy"><a href="https://docs.internationaltouch.org/policy/player-eligibility/#eligibility">FIT Player Eligibility Policy</a></cite>
+        </figcaption>
+    </figure>
+{% endblock after_form %}

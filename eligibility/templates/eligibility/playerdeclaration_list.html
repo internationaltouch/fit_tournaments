@@ -53,8 +53,9 @@
                                 {% endfor %}
                             </td>
                             <td>
-                                {% url 'declaration' player.pk declaration.pk as url %}
+                                {% url 'declaration' declaration.pk as url %}
                                 {% bootstrap_button declaration.timestamp|date button_type="link" size="small" href=url %}
+                                {{ declaration.evidence_nation|yesno }}
                             </td>
                         </tr>
                     {% endwith %}

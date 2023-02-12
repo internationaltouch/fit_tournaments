@@ -14,9 +14,14 @@ player_urls = [
     path("<uuid:player>/parents/<uuid:parent>/grandparent/<uuid:pk>", players.grandparent_edit, name="grandparent"),
 ]
 
+nation_urls = [
+    path("<uuid:uuid>", nations.declaration_verify, name="declaration"),
+]
+
 urlpatterns = [
     path("", views.index, name="index"),
     path("players", players.PlayerList.as_view(), name="players"),
     path("players/", include(player_urls)),
-    path("nation", nations.declaration_list, name="nations"),
+    path("nations", nations.declaration_list, name="nations"),
+    path("nations/", include(nation_urls)),
 ]

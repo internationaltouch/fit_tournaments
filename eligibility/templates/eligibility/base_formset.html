@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load bootstrap5 eligibility_tags %}
+
+{% block container %}
+    <main class="mt-3">
+        <form class="card mb-3" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h4 class="card-header text-center">{% block card_title %}{% endblock %}</h4>
+            <div class="card-body">
+                {% block before_form %}{% endblock %}
+                {% bootstrap_formset formset layout='horizontal' %}
+                {% block after_form %}{% endblock %}
+            </div>
+            {% block after_body %}{% endblock %}
+            {% block card_footer %}
+                <div class="card-footer">
+                    {% bootstrap_button "Save" %}
+                    {% bootstrap_button "Clear" button_type="reset" button_class="btn-secondary" %}
+                    {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
+                </div>
+            {% endblock %}
+            {% block after_footer %}{% endblock %}
+        </form>
+    </main>
+{% endblock %}

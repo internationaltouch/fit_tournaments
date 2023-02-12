@@ -1,7 +1,11 @@
 from django import forms
-
-from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
+from django.core.exceptions import ValidationError
+from django.forms import BaseFormSet, formset_factory, inlineformset_factory
 from modelforms.forms import ModelForm
+
+from eligibility.fields import BooleanChoiceField
+from eligibility.models import GrandParent, Parent, Person, Player, PlayerDeclaration
+from eligibility.utils import boolean_coerce
 
 
 class PlayerForm(forms.ModelForm):
@@ -52,3 +56,42 @@ class PlayerDeclarationForm(forms.ModelForm):
         except PlayerDeclaration.DoesNotExist:
             pass
         self.fields["elected_country"].queryset = qs
+
+
+class SightingForm(forms.Form):
+    evidence = forms.CharField(label="", required=True)
+
+
+class SightingFormSet(BaseFormSet):
+    def __init__(self, people, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.people = people
+
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        if index:
+            form.fields[
+                "evidence"
+            ].label = (
+                f"{self.people[index]} was born in {self.people[index].birthplace}"
+            )
+            form.fields["evidence"].help_text = (
+                f"Note the documentation you viewed that demonstrates {self.people[index]} "
+                f"was born in {self.people[index].birthplace}."
+            )
+            form.fields["evidence"].widget.attrs[
+                "placeholder"
+            ] = "Examples: birth certificate, passport, etc"
+        else:
+            form.fields[
+                "evidence"
+            ].label = (
+                f"{self.people[index]} is a resident of {self.people[index].residency}"
+            )
+            form.fields["evidence"].help_text = (
+                f"Note the documentation you viewed that demonstrates {self.people[index]} "
+                f"is a resident of {self.people[index].residency}, including dates."
+            )
+            form.fields["evidence"].widget.attrs[
+                "placeholder"
+            ] = "Examples: rental statements, utility bills, etc"

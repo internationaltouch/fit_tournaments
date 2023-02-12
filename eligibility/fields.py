@@ -45,6 +45,8 @@ class BooleanField(models.BooleanField):
 class JSONField(models.JSONField):
     def from_db_value(self, value, expression, connection):
         try:
+            if value is None:
+                raise DeserializationError("Can't deserialize a NULL field.")
             cached_values = [
                 obj.object for obj in serializers.deserialize("json", value)
             ]

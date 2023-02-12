@@ -151,7 +151,7 @@ class PlayerDeclaration(models.Model):
         editable=False,
         related_name="declarations",
         on_delete=models.PROTECT,
-        help_text="The user who made this declaration for the player."
+        help_text="The user who made this declaration for the player.",
     )
     timestamp = models.DateTimeField(
         auto_now_add=True,
@@ -188,6 +188,11 @@ class PlayerDeclaration(models.Model):
     data = JSONField(
         editable=False,
         help_text="Serialized data that locks the values in time.",
+    )
+    evidence_nation = JSONField(
+        null=True,
+        editable=False,
+        help_text="Record of documents sighted by FIT member.",
     )
     supersceded_by = models.ForeignKey(
         "self",

@@ -1,6 +1,14 @@
 from django.contrib.auth.decorators import login_required
+from django.forms import formset_factory
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
+from guardian.decorators import permission_required
 from guardian.shortcuts import get_objects_for_user
+
+from eligibility.forms import SightingForm, SightingFormSet
+from eligibility.models import Player, PlayerDeclaration
 
 
 @login_required
@@ -20,3 +28,58 @@ def declaration_list(request):
         "object_list": object_list,
     }
     return TemplateResponse(request, "eligibility/playerdeclaration_list.html", context)
+
+
+@permission_required(
+    "eligibility.view_playerdeclaration",
+    (PlayerDeclaration, "pk", "uuid"),
+    accept_global_perms=True,
+)
+def declaration_verify(request, uuid):
+    instance = get_object_or_404(PlayerDeclaration, uuid=uuid)
+    player = get_object_or_404(Player, uuid=instance.player_id)
+    form_count = len(instance.data) + 1
+    formset_class = formset_factory(
+        SightingForm,
+        SightingFormSet,
+        extra=0,
+        min_num=form_count,
+        max_num=form_count,
+    )
+    people = instance.data[:1] + instance.data
+
+    if request.method == "POST":
+        formset = formset_class(people=people, data=request.POST)
+        if formset.is_valid():
+            data = {}  # Group the values by the people they belong to
+            for person, evidence in zip(people, formset.cleaned_data):
+                data.setdefault(person, []).append(evidence["evidence"])
+            instance.evidence_nation = [
+                # First item is a pair, everything else we pick out the singleton.
+                value if len(value) > 1 else value[0]
+                for value in data.values()
+            ]
+            instance.save(update_fields=["evidence_nation"])
+            return redirect(reverse("nations"))
+
+    elif instance.evidence_nation:
+        # When the data has previously been submitted, unpack it and pass to the
+        # formset constructor to pre-populate the form fields.
+        initial = [
+            {"evidence": evidence}
+            # First item is a pair, everything else is a singleton.
+            for evidence in instance.evidence_nation[0] + instance.evidence_nation[1:]
+        ]
+        formset = formset_class(people=people, initial=initial)
+
+    else:
+        formset = formset_class(people=people)
+
+    context = {
+        "object": instance,
+        "player": player,
+        "formset": formset,
+    }
+    return TemplateResponse(
+        request, "eligibility/nations/playerdeclaration_form.html", context
+    )

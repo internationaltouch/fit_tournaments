@@ -75,6 +75,7 @@ class PlayerDeclarationAdmin(GuardedModelAdmin):
         "elected_country",
         "supersceded_by",
         "data",
+        "evidence_nation",
     )
     readonly_fields = (
         "name",
@@ -82,4 +83,5 @@ class PlayerDeclarationAdmin(GuardedModelAdmin):
         "eligible_for",
         "supersceded_by",
         "data",
+        "evidence_nation",
     )
