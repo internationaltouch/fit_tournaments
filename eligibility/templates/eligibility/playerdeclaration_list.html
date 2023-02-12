@@ -54,8 +54,9 @@
                             </td>
                             <td>
                                 {% url 'declaration' declaration.pk as url %}
-                                {% bootstrap_button declaration.timestamp|date button_type="link" size="small" href=url %}
-                                {{ declaration.evidence_nation|yesno }}
+                                {% with declaration.evidence_nation|yesno:"success,danger,warning" as button_colour %}
+                                    {% bootstrap_button declaration.timestamp|date button_type="link" size="small" href=url button_class="btn-"|add:button_colour %}
+                                {% endwith %}
                             </td>
                         </tr>
                     {% endwith %}
