@@ -1,5 +1,5 @@
 import uuid
-from typing import Any, List
+from typing import List
 
 from dirtyfields import DirtyFieldsMixin
 from django.contrib.auth import get_user_model
@@ -234,3 +234,37 @@ class PlayerDeclaration(models.Model):
 
     def clean(self):
         person_declaration_clean(self)
+
+
+class Event(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    name = models.CharField(max_length=256)
+    closing_date = models.DateField(blank=True, null=True, help_text="Closing date for nominations.")
+    team_date = models.DateField(blank=True, null=True, help_text="Two weeks prior to closing date.")
+    squad_date = models.DateField(blank=True, null=True, help_text="Three months prior to closing date.")
+
+    class Meta:
+        ordering = ("closing_date",)
+
+    def __str__(self):
+        return self.name
+
+
+class NationalSquad(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    event = models.ForeignKey(Event, related_name="squads", on_delete=models.PROTECT)
+    name = models.CharField(max_length=256)
+    players = models.ManyToManyField(
+        PlayerDeclaration,
+        blank=True,
+        limit_choices_to=models.Q(
+            supersceded_by__isnull=True,
+        ),
+    )
+
+    class Meta:
+        unique_together = ("event", "name")
+        ordering = ("event", "name")
+
+    def __str__(self):
+        return f"{self.name} - {self.event.name}"

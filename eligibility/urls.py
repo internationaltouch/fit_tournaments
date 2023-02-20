@@ -16,6 +16,7 @@ player_urls = [
 
 nation_urls = [
     path("<uuid:uuid>", nations.declaration_verify, name="declaration"),
+    path("events", nations.event_list, name="events"),
 ]
 
 urlpatterns = [

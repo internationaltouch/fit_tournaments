@@ -1,0 +1,58 @@
+{% extends "simple.html" %}
+{% load bootstrap5 %}
+
+{% block card_title %}Events{% endblock %}
+
+{% block card_body %}
+    <h4 class="card-title">Upcoming Events</h4>
+    <p>For each event below, you nation administrators can notify FIT of the dual-qualified players who are to be
+        included in the <strong>squad</strong> and eventually <strong>teams</strong> representing the nation at an
+        upcoming event.</p>
+
+    <p>The policy stipulates when the notifications must have taken place by, the dates set for the event are shown and
+        will strictly enforce the terms of the policy.</p>
+
+    <dl>
+        <dt>Closing Date</dt>
+        <dd>The date by which entries for the event must be received by FIT</dd>
+        <dt>Squad Date</dt>
+        <dd>The date by which Tier One Nations must notify FIT which dual-qualified players have been selected into their squads</dd>
+        <dt>Team Date</dt>
+        <dd>The date by which Tier One Nations must notify FIT which dual-qualified players have been selected into their teams</dd>
+    </dl>
+
+    {% if not object_list %}
+        {% bootstrap_alert "Sorry, there are no upcoming events for you to link players to." alert_type="danger" dismissible=False %}
+    {% endif %}
+{% endblock card_body %}
+
+{% block between_body_footer %}
+    {% if object_list %}
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Event</th>
+                <th>Squad Date</th>
+                <th>Team Date</th>
+                <th>Closing Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for event in object_list %}
+                <tr>
+                    <td>{{ event }}</td>
+                    <td>
+                        {% bootstrap_button event.squad_date|date size="small" button_class="btn-"|add:event.squad_date_class %}
+                        <span class="badge rounded-pill bg-primary">0</span>
+                    </td>
+                    <td>
+                        {% bootstrap_button event.team_date|date size="small" button_class="btn-"|add:event.team_date_class %}
+                        <span class="badge rounded-pill bg-primary">0</span>
+                    </td>
+                    <td>{{ event.closing_date }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock between_body_footer %}

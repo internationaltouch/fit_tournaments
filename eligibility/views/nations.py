@@ -1,14 +1,16 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import Case, Value, When
 from django.forms import formset_factory
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
+from django.utils import timezone
 from guardian.decorators import permission_required
 from guardian.shortcuts import get_objects_for_user
 
 from eligibility.forms import SightingForm, SightingFormSet
-from eligibility.models import Player, PlayerDeclaration
+from eligibility.models import Country, Event, Player, PlayerDeclaration
 
 
 @login_required
@@ -27,7 +29,7 @@ def declaration_list(request):
     context = {
         "object_list": object_list,
     }
-    return TemplateResponse(request, "eligibility/playerdeclaration_list.html", context)
+    return TemplateResponse(request, "eligibility/nations/playerdeclaration_list.html", context)
 
 
 @permission_required(
@@ -83,3 +85,20 @@ def declaration_verify(request, uuid):
     return TemplateResponse(
         request, "eligibility/nations/playerdeclaration_form.html", context
     )
+
+
+@permission_required("eligibility.create_nationalsquad")
+def event_list(request):
+    date = timezone.now().date()
+    object_list = Event.objects.filter(closing_date__gt=date).annotate(
+        squad_date_class=Case(When(squad_date__gt=date, then=Value("warning")), default=Value("danger")),
+        team_date_class=Case(When(team_date__gt=date, then=Value("warning")), default=Value("danger")),
+    )
+    group_list = request.user.groups.filter(name__in=Country.objects.values_list("name"))
+    context = {
+        "object_list": object_list,
+        "group_list": group_list,  # FIXME: not required, just using while developing.
+        "date": date,
+        "cancel_url": reverse("nations"),
+    }
+    return TemplateResponse(request, "eligibility/nations/event_list.html", context)
