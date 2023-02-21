@@ -42,11 +42,13 @@
                 <tr>
                     <td>{{ event }}</td>
                     <td>
-                        {% bootstrap_button event.squad_date|date size="small" button_class="btn-"|add:event.squad_date_class %}
+                        {% url "squad" event.pk as squad_url %}
+                        {% bootstrap_button event.squad_date|date button_type="link" href=squad_url size="small" button_class="btn-"|add:event.squad_date_class %}
                         <span class="badge rounded-pill bg-primary">0</span>
                     </td>
                     <td>
-                        {% bootstrap_button event.team_date|date size="small" button_class="btn-"|add:event.team_date_class %}
+                        {% url "team" event.pk as team_url %}
+                        {% bootstrap_button event.team_date|date button_type="link" href=team_url size="small" button_class="btn-"|add:event.team_date_class %}
                         <span class="badge rounded-pill bg-primary">0</span>
                     </td>
                     <td>{{ event.closing_date }}</td>

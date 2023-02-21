@@ -40,7 +40,7 @@
                         </td>
                         <td>
                             {% with player.declarations.first as declaration %}
-                                {% url 'declaration' player.pk as declaration_url %}
+                                {% url 'declaration' player=player.pk as declaration_url %}
                                 {% if declaration.pk %}
                                     {% url 'declaration' player.pk declaration.pk as url %}
                                     <a href="{{ url }}">{{ declaration.elected_country }}</a>

@@ -1,8 +1,15 @@
 from django import forms
-from django.forms import BaseFormSet
+from django.forms import BaseFormSet, BaseInlineFormSet
+from guardian.shortcuts import get_objects_for_user
 from modelforms.forms import ModelForm
 
-from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
+from eligibility.models import (
+    GrandParent,
+    NationalSquad,
+    Parent,
+    Player,
+    PlayerDeclaration,
+)
 
 
 class PlayerForm(forms.ModelForm):
@@ -83,3 +90,39 @@ class SightingFormSet(BaseFormSet):
         field.label = label
         field.widget.attrs["placeholder"] = placeholder
         field.help_text = help_text
+
+
+class NationalSquadForm(forms.ModelForm):
+    name = forms.HiddenInput()
+    class Meta:
+        model = NationalSquad
+        fields = ("name", "players")
+
+
+class PlayerDeclarationMultipleChoiceField(forms.ModelMultipleChoiceField):
+    widget = forms.CheckboxSelectMultiple
+    def label_from_instance(self, obj):
+        return str(obj.player)
+
+
+class NationalSquadFormSet(BaseInlineFormSet):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        form.fields["name"].widget = forms.HiddenInput()
+        form.fields["players"] = PlayerDeclarationMultipleChoiceField(
+            queryset=get_objects_for_user(
+                self.user,
+                "eligibility.view_playerdeclaration",
+                use_groups=True,
+                any_perm=True,
+            ).filter(
+                supersceded_by__isnull=True,
+                elected_country__name=form.instance.name,
+            ),
+            label=form.initial.get("name", form.instance.name),
+            required=False,
+        )

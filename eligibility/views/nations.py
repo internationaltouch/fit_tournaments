@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Case, Value, When
-from django.forms import formset_factory
-from django.http import Http404
+from django.forms import formset_factory, inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -9,8 +8,13 @@ from django.utils import timezone
 from guardian.decorators import permission_required
 from guardian.shortcuts import get_objects_for_user
 
-from eligibility.forms import SightingForm, SightingFormSet
-from eligibility.models import Country, Event, Player, PlayerDeclaration
+from eligibility.forms import (
+    NationalSquadForm,
+    NationalSquadFormSet,
+    SightingForm,
+    SightingFormSet,
+)
+from eligibility.models import Country, Event, NationalSquad, Player, PlayerDeclaration
 
 
 @login_required
@@ -29,7 +33,9 @@ def declaration_list(request):
     context = {
         "object_list": object_list,
     }
-    return TemplateResponse(request, "eligibility/nations/playerdeclaration_list.html", context)
+    return TemplateResponse(
+        request, "eligibility/nations/playerdeclaration_list.html", context
+    )
 
 
 @permission_required(
@@ -91,10 +97,16 @@ def declaration_verify(request, uuid):
 def event_list(request):
     date = timezone.now().date()
     object_list = Event.objects.filter(closing_date__gt=date).annotate(
-        squad_date_class=Case(When(squad_date__gt=date, then=Value("warning")), default=Value("danger")),
-        team_date_class=Case(When(team_date__gt=date, then=Value("warning")), default=Value("danger")),
+        squad_date_class=Case(
+            When(squad_date__gt=date, then=Value("warning")), default=Value("danger")
+        ),
+        team_date_class=Case(
+            When(team_date__gt=date, then=Value("warning")), default=Value("danger")
+        ),
     )
-    group_list = request.user.groups.filter(name__in=Country.objects.values_list("name"))
+    group_list = request.user.groups.filter(
+        name__in=Country.objects.values_list("name")
+    )
     context = {
         "object_list": object_list,
         "group_list": group_list,  # FIXME: not required, just using while developing.
@@ -102,3 +114,50 @@ def event_list(request):
         "cancel_url": reverse("nations"),
     }
     return TemplateResponse(request, "eligibility/nations/event_list.html", context)
+
+
+@permission_required("eligibility.edit_event")
+def event_notify_squad(request, event):
+    instance = get_object_or_404(Event, pk=event)
+
+    group_list = request.user.groups.filter(
+        name__in=Country.objects.values_list("name")
+    )
+    group_count = group_list.count()
+
+    formset_class = inlineformset_factory(
+        Event,
+        NationalSquad,
+        form=NationalSquadForm,
+        formset=NationalSquadFormSet,
+        min_num=group_count,
+        max_num=group_count,
+        extra=0,
+        can_delete=False,
+    )
+
+    if request.method == "POST":
+        formset = formset_class(data=request.POST, instance=instance, user=request.user)
+        if formset.is_valid():
+            object_list = formset.save()
+            return redirect(reverse("events"))
+    else:
+        formset = formset_class(
+            instance=instance,
+            user=request.user,
+        )
+
+    context = {
+        "object": instance,
+        "formset": formset,
+        "cancel_url": reverse("events"),
+    }
+    return TemplateResponse(request, "eligibility/nations/event_form.html", context)
+
+
+@permission_required("eligibility.edit_event")
+def event_notify_team(request, event):
+    context = {
+        "cancel_url": reverse("events"),
+    }
+    return TemplateResponse(request, "eligibility/nations/event_form.html", context)
