@@ -3,6 +3,7 @@
 /.coverage
 /.env
 /.idea
+/.ipynb_checkpoints
 /.tox
 /db.sqlite3
 /static
