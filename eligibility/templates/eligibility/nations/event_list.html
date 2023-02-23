@@ -5,9 +5,9 @@
 
 {% block card_body %}
     <h4 class="card-title">Upcoming Events</h4>
-    <p>For each event below, you nation administrators can notify FIT of the dual-qualified players who are to be
-        included in the <strong>squad</strong> and eventually <strong>teams</strong> representing the nation at an
-        upcoming event.</p>
+    <p>For each event below, nation administrators can notify FIT of the dual-qualified players who are to be included
+        in the <strong>squad</strong> and eventually <strong>teams</strong> representing the nation at an upcoming
+        event.</p>
 
     <p>The policy stipulates when the notifications must have taken place by, the dates set for the event are shown and
         will strictly enforce the terms of the policy.</p>
@@ -28,7 +28,7 @@
 
 {% block between_body_footer %}
     {% if object_list %}
-        <table class="table table-striped">
+        <table class="table table-striped align-middle">
             <thead>
             <tr>
                 <th>Event</th>
@@ -42,14 +42,18 @@
                 <tr>
                     <td>{{ event }}</td>
                     <td>
-                        {% url "squad" event.pk as squad_url %}
-                        {% bootstrap_button event.squad_date|date button_type="link" href=squad_url size="small" button_class="btn-"|add:event.squad_date_class %}
-                        <span class="badge rounded-pill bg-primary">0</span>
+                        {% url "squad" event=event.pk as squad_url %}
+                        {# bootstrap_button event.squad_date|date button_type="link" href=squad_url size="small" button_class="btn-"|add:event.squad_date_class #}
+                        <a class="btn btn-{{ event.squad_date_class }} btn-sm position-relative" href="{{ squad_url }}" role="button">
+                            {{ event.squad_date|date }}
+                            <!--{# XXX: counters might be useful; leaving this as a HOWTO. #}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary">99+</span>
+                            -->
+                        </a>
                     </td>
                     <td>
                         {% url "team" event.pk as team_url %}
                         {% bootstrap_button event.team_date|date button_type="link" href=team_url size="small" button_class="btn-"|add:event.team_date_class %}
-                        <span class="badge rounded-pill bg-primary">0</span>
                     </td>
                     <td>{{ event.closing_date }}</td>
                 </tr>

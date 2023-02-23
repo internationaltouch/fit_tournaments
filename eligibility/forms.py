@@ -1,5 +1,7 @@
 from django import forms
+from django.db.models import Q
 from django.forms import BaseFormSet, BaseInlineFormSet
+from django.utils.safestring import mark_safe
 from guardian.shortcuts import get_objects_for_user
 from modelforms.forms import ModelForm
 
@@ -94,15 +96,28 @@ class SightingFormSet(BaseFormSet):
 
 class NationalSquadForm(forms.ModelForm):
     name = forms.HiddenInput()
+
     class Meta:
         model = NationalSquad
-        fields = ("name", "players")
+        fields = ("players",)
 
 
 class PlayerDeclarationMultipleChoiceField(forms.ModelMultipleChoiceField):
-    widget = forms.CheckboxSelectMultiple
     def label_from_instance(self, obj):
-        return str(obj.player)
+        res = f"{obj.player}"
+        for country in obj.eligible_for:
+            if obj.supersceded_by:
+                color = (
+                    "danger"
+                    if country == obj.supersceded_by.elected_country.name
+                    else "secondary"
+                )
+            else:
+                color = (
+                    "success" if country == obj.elected_country.name else "secondary"
+                )
+            res += f' <span class="badge bg-{color}">{country}</span>'
+        return mark_safe(res)
 
 
 class NationalSquadFormSet(BaseInlineFormSet):
@@ -112,17 +127,37 @@ class NationalSquadFormSet(BaseInlineFormSet):
 
     def add_fields(self, form, index):
         super().add_fields(form, index)
-        form.fields["name"].widget = forms.HiddenInput()
-        form.fields["players"] = PlayerDeclarationMultipleChoiceField(
-            queryset=get_objects_for_user(
+        queryset = (
+            get_objects_for_user(
                 self.user,
                 "eligibility.view_playerdeclaration",
                 use_groups=True,
                 any_perm=True,
-            ).filter(
-                supersceded_by__isnull=True,
-                elected_country__name=form.instance.name,
-            ),
-            label=form.initial.get("name", form.instance.name),
+            )
+            .filter(elected_country__name=form.instance.name)
+            .filter(
+                Q(
+                    # If a declaration has been superseded we do not want to use it.
+                    supersceded_by__isnull=True,
+                    # If the nation has not recorded that they've verified the
+                    # eligibility standing of the individual in the declaration, we
+                    # don't want them to be able to select them.
+                    evidence_nation__isnull=False,
+                )
+                |
+                # We want to make sure that already selected items remain in the
+                # queryset, even if they've subsequently gone out of scope; we can
+                # give the nation visual feedback.
+                Q(pk__in=form.instance.players.all())
+            )
+        )
+        form.fields["players"] = PlayerDeclarationMultipleChoiceField(
+            queryset=queryset,
             required=False,
+            widget=forms.CheckboxSelectMultiple,
+            help_text=(
+                f"Select the names of players dual-eligible for {form.instance.name} "
+                f"that you are naming in the squad. Only players included in this "
+                f"squad will be able to be progressed to the final teams."
+            ),
         )
