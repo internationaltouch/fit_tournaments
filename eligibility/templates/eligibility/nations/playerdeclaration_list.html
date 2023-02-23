@@ -19,7 +19,7 @@
                     <li>Record the type of documents that were sighted in support of each part of the eligibility declaration.</li>
                 </ol>
 
-                <p>Tier-One nations must notify FIT which</p>
+                <p>Tier One Nations must notify FIT which</p>
 
                 <ol>
                     <li>Dual-qualified players have been selected for the international event squads a <strong>minimum
@@ -41,7 +41,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for declaration in object_list.select_related.distinct %}
+                {% for declaration in page.object_list %}
                     {% with declaration.player as player %}
                         <tr>
                             <td><a href="{% url 'player' player.pk %}">{{ player }}</a></td>
@@ -63,7 +63,15 @@
                 {% endfor %}
                 </tbody>
             </table>
+            {% if page.has_other_pages %}
+                <div class="card-body">
+                    {% bootstrap_pagination page size="small" %}
+                </div>
+            {% endif %}
             <div class="card-footer">
+                {% url "events" as events_url %}
+                {% bootstrap_button "Events" button_type="link" href=events_url button_class="btn-primary" %}
+
                 {% url 'index' as cancel_url %}
                 {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
             </div>

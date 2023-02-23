@@ -1,6 +1,8 @@
+import pdb
 from dataclasses import dataclass
 from typing import Optional
 
+from django.conf import settings
 from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.forms import model_to_dict
@@ -13,6 +15,13 @@ register = Library()
 class DiffItem:
     value: str
     state: Optional[bool] = None
+
+
+@register.filter("pdb")
+def do_pdb(obj):
+    if settings.DEBUG:
+        pdb.set_trace()
+    return obj
 
 
 @register.filter("fieldname")

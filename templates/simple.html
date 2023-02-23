@@ -8,9 +8,10 @@
             <div class="card-body">
                 {% block card_body %}{% endblock %}
             </div>
+            {% block between_body_footer %}{% endblock %}
             <div class="card-footer">
                 {% block card_buttons %}{% endblock %}
-                {% url 'index' as cancel_url %}
+                {% if not cancel_url %}{% url 'index' as cancel_url %}{% endif %}
                 {% bootstrap_button "Cancel" button_type="link" href=cancel_url button_class="btn-link" %}
             </div>
         </div>
