@@ -17,3 +17,42 @@ class EligibilityTest(TestCase):
 
         with self.subTest("Only eligible for AUS"):
             self.assertEqual(Player.objects.get(pk=player.pk).eligible(), [AUS.name])
+
+    def test_extreme_player(self):
+        "Validate that a player with 'exotic' history has eligibility across all of them."
+        country = Country.objects.iterator()
+        player = PlayerFactory.create(
+            country_of_birth=next(country),
+            residence=next(country),
+        )
+        # Both biological parents were adopted, and also has two adopted parents that
+        # were themselves adopted...
+        for adopted in (False, True):
+            for rel1 in ("father", "mother"):
+                parent = ParentFactory.create(
+                    child=player,
+                    country_of_birth=next(country),
+                    adopted=adopted,
+                )
+                for rel2 in ("grandfather", "grandmother"):
+                    GrandParentFactory.create(
+                        child=parent,
+                        country_of_birth=next(country),
+                    )
+                    GrandParentFactory.create(
+                        child=parent,
+                        country_of_birth=next(country),
+                        adopted=True,
+                    )
+
+        with self.subTest("Player has MANY eligibility options to choose from"):
+            eligible_for = Player.objects.get(pk=player.pk).eligible()
+            # Expected length is
+            # 2 (birth, residence)
+            # + 2 bio p + 4 bio gp + 4 adopted gp of bio p
+            # + 2 adopted p + 4 bio gp of adopted p + 4 adopted gp of adopted p
+            # = 2 + 2 + 4 + 4 + 2 + 4 + 4 = 22
+            self.assertCountEqual(
+                eligible_for,
+                Country.objects.values_list("name", flat=True)[:22],
+            )
