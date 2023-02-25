@@ -120,6 +120,8 @@ WSGI_APPLICATION = "project.wsgi.application"
 
 DATABASES = {"default": env.db(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
 
+# Tuning, set persistent connections to the database
+DATABASES["default"]["CONN_MAX_AGE"] = 0 if DEBUG else 600
 
 # Email
 # https://docs.djangoproject.com/en/3.2/ref/settings/#email-backend
