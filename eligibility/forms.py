@@ -13,6 +13,7 @@ from eligibility.models import (
     Player,
     PlayerDeclaration,
 )
+from eligibility.utils import get_age
 
 
 class PlayerForm(forms.ModelForm):
@@ -96,7 +97,6 @@ class SightingFormSet(BaseFormSet):
 
 
 class NationalSquadForm(forms.ModelForm):
-
     class Meta:
         model = NationalSquad
         fields = ("players",)
@@ -104,7 +104,7 @@ class NationalSquadForm(forms.ModelForm):
 
 class PlayerDeclarationMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
-        res = f"{obj.player}"
+        res = f"{obj.player} ({get_age(obj.player)})"
         for country in obj.eligible_for:
             if obj.supersceded_by:
                 color = (
