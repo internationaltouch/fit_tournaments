@@ -211,18 +211,20 @@ class PlayerDeclaration(models.Model):
 
     def newly_added_ancestors(self):
         """
-        The following ancestors were not recorded when the declaration was made; this can change the eligibility
-        standing of the individual _if_ an ancestor was born in a country not already seen amongst the other ancestors.
+        The following ancestors were not recorded when the declaration was made; this
+        can change the eligibility standing of the individual _if_ an ancestor was born
+        in a country not already seen amongst the other ancestors.
         """
         pks = [s.pk for s in self.data]
         ancestors = [
-            p for p in Parent.objects.filter(child=self.player).exclude(pk__in=pks)
+            parent
+            for parent in Parent.objects.filter(child=self.player).exclude(pk__in=pks)
         ]
         ancestors += [
-            gp
-            for gp in GrandParent.objects.filter(child__child=self.player).exclude(
-                pk__in=pks
-            )
+            grandparent
+            for grandparent in GrandParent.objects.filter(
+                child__child=self.player
+            ).exclude(pk__in=pks)
         ]
         return ancestors
 
@@ -239,9 +241,15 @@ class PlayerDeclaration(models.Model):
 class Event(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(max_length=256)
-    closing_date = models.DateField(blank=True, null=True, help_text="Closing date for nominations.")
-    team_date = models.DateField(blank=True, null=True, help_text="Two weeks prior to closing date.")
-    squad_date = models.DateField(blank=True, null=True, help_text="Three months prior to closing date.")
+    closing_date = models.DateField(
+        blank=True, null=True, help_text="Closing date for nominations."
+    )
+    team_date = models.DateField(
+        blank=True, null=True, help_text="Two weeks prior to closing date."
+    )
+    squad_date = models.DateField(
+        blank=True, null=True, help_text="Three months prior to closing date."
+    )
 
     class Meta:
         ordering = ("closing_date",)
@@ -257,9 +265,7 @@ class NationalSquad(models.Model):
     players = models.ManyToManyField(
         PlayerDeclaration,
         blank=True,
-        limit_choices_to=models.Q(
-            supersceded_by__isnull=True,
-        ),
+        limit_choices_to=models.Q(supersceded_by__isnull=True),
     )
 
     class Meta:
@@ -268,3 +274,17 @@ class NationalSquad(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.event.name}"
+
+
+class NationalTeam(models.Model):
+    squad = models.OneToOneField(
+        NationalSquad, primary_key=True, on_delete=models.PROTECT, editable=False
+    )
+    players = models.ManyToManyField(PlayerDeclaration, blank=True)
+
+    class Meta:
+        unique_together = ("squad",)
+        ordering = ("squad",)
+
+    def __str__(self):
+        return f"{self.squad.name} - {self.squad.event.name}"

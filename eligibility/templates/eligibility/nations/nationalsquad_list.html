@@ -9,7 +9,7 @@
 
     {% for squad in object_list %}
         {% cycle 'odd' 'even' as row silent %}
-        <div class="card">
+        <div class="card mb-3">
             <h5 class="card-header text-center">{{ squad }}</h5>
             <ul class="list-group list-group-flush">
                 {% for player in squad.players.all %}
@@ -17,6 +17,10 @@
                         {{ player.name }}
                         {% if player.supersceded_by %}<span class="badge bg-danger">Superseded</span>{% endif %}
                         <span class="badge bg-secondary">{{ player.timestamp|timesince }} ago</span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">
+                        <em>No players declared.</em>
                     </li>
                 {% endfor %}
             </ul>
