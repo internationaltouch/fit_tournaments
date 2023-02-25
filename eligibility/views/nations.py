@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Case, Value, When
@@ -14,10 +15,18 @@ from guardian.shortcuts import assign_perm, get_objects_for_user
 from eligibility.forms import (
     NationalSquadForm,
     NationalSquadFormSet,
+    NationalTeamFormSet,
     SightingForm,
     SightingFormSet,
 )
-from eligibility.models import Country, Event, NationalSquad, Player, PlayerDeclaration
+from eligibility.models import (
+    Country,
+    Event,
+    NationalSquad,
+    NationalTeam,
+    Player,
+    PlayerDeclaration,
+)
 
 
 @login_required
@@ -195,7 +204,50 @@ def event_notify_squad(request, event):
 
 @permission_required("eligibility.edit_event")
 def event_notify_team(request, event):
+    instance = get_object_or_404(Event, pk=event)
+
+    squads = (
+        get_objects_for_user(
+            request.user,
+            "eligibility.change_nationalsquad",
+            use_groups=True,
+            any_perm=True,
+            with_superuser=False,
+        )
+        .filter(event=event)
+        .order_by("name")
+    )
+
+    if not squads.exists():
+        raise Http404("User has no national squads to manage.")
+
+    groups = Group.objects.in_bulk(field_name="name")
+    for squad in squads:
+        team, created = NationalTeam.objects.get_or_create(squad=squad)
+        if created:
+            assign_perm("eligibility.change_nationalteam", groups[squad.name], team)
+
+    queryset = NationalTeam.objects.filter(squad__event=instance)
+
     context = {
+        "object": instance,
+        "object_list": queryset,
+        "due_date": instance.team_date,
         "cancel_url": reverse("events"),
     }
+
+    if instance.squad_date < timezone.now().date():
+        return TemplateResponse(
+            request, "eligibility/nations/nationalteam_list.html", context
+        )
+
+    if request.method == "POST":
+        formset = NationalTeamFormSet(data=request.POST, queryset=queryset)
+        if formset.is_valid():
+            formset.save()
+            return redirect(reverse("events"))
+    else:
+        formset = NationalTeamFormSet(queryset=queryset)
+
+    context["formset"] = formset
     return TemplateResponse(request, "eligibility/nations/event_form.html", context)

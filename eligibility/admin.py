@@ -14,6 +14,7 @@ from eligibility.models import (
     Event,
     GrandParent,
     NationalSquad,
+    NationalTeam,
     Parent,
     Player,
     PlayerDeclaration,
@@ -106,3 +107,10 @@ class EventAdmin(GuardedModelAdmin):
 class NationalSquadAdmin(GuardedModelAdmin):
     list_display = ("name", "event")
     list_filter = ("event",)
+
+
+@admin.register(NationalTeam)
+class NationalTeamAdmin(GuardedModelAdmin):
+    pass
+    # list_display = ("name", "event")
+    list_filter = ("squad__event",)

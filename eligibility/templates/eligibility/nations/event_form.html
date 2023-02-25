@@ -9,7 +9,7 @@
     <p>On this page, Tier One Nations notify FIT which dual-eligible players have been included in their
         {{ object_list|type }}{{ object_list.count|pluralize }} for the <strong>{{ object }}</strong>.</p>
 
-    <p>The final day to update this squad declaration is <strong>{{ due_date }}</strong>. After this date,
+    <p>The final day to update this {{ object_list|type }} declaration is <strong>{{ due_date }}</strong>. After this date,
         you will no longer be able to make changes.</p>
 
     <form action="" method="post" enctype="multipart/form-data">
@@ -20,10 +20,20 @@
             {% if row == 'odd' %}<div class="row mb-3">{% endif %}
                 <div class="{% if forloop.first and forloop.last %}col{% else %}col-sm-6{% endif %}">
                     <div class="card">
-                        <h5 class="card-header">{{ form.instance.name }}</h5>
+                        <h5 class="card-header">
+                            {% if object_list|type == "national team" %}
+                                {{ form.instance.squad.name }}
+                            {% else %}
+                                {{ form.instance.name }}
+                            {% endif %}
+                        </h5>
                         <div class="card-body pb-0">
                             {% if not form.players.field.queryset.exists %}
-                                {% bootstrap_alert "You have note verified any players to include in this squad." alert_type="warning" %}
+                                {% if object_list|type == "national team" %}
+                                    {% bootstrap_alert "You have no squad players to include in this team." alert_type="danger" dismissible=False %}
+                                {% else %}
+                                    {% bootstrap_alert "You have not verified any players to include in this squad." alert_type="warning" %}
+                                {% endif %}
                             {% endif %}
                             {% bootstrap_form form layout="horizontal" %}
                         </div>
