@@ -109,8 +109,4 @@ class NationalSquadAdmin(GuardedModelAdmin):
     list_filter = ("event",)
 
 
-@admin.register(NationalTeam)
-class NationalTeamAdmin(GuardedModelAdmin):
-    pass
-    # list_display = ("name", "event")
-    list_filter = ("squad__event",)
+admin.site.register(NationalTeam, GuardedModelAdmin)
