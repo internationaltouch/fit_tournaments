@@ -104,6 +104,9 @@ wheel==0.38.4
 whitenoise==6.3.0
     # via -r requirements.in
 
+# Manually added, refresh requirements.txt required
+sentry-sdk
+
 # The following packages are considered to be unsafe in a requirements file:
 # pip
 # setuptools
