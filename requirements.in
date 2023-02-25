@@ -14,5 +14,6 @@ gunicorn
 pip-tools
 psycopg2
 requests
+sentry-sdk
 social-auth-app-django
 whitenoise
