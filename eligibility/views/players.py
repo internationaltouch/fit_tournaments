@@ -30,7 +30,9 @@ def player_list(request):
         .prefetch_related(
             Prefetch(
                 "declarations",
-                queryset=PlayerDeclaration.objects.defer("data", "evidence_nation"),
+                queryset=PlayerDeclaration.objects.defer(
+                    "data", "evidence_nation"
+                ).select_related("elected_country"),
             ),
         )
     )
