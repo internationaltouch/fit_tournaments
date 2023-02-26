@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
+from django.db.models import Prefetch
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -26,6 +27,12 @@ def player_list(request):
         )
         .eligibility_by_birth()
         .eligibility_by_residence()
+        .prefetch_related(
+            Prefetch(
+                "declarations",
+                queryset=PlayerDeclaration.objects.defer("data", "evidence_nation"),
+            ),
+        )
     )
     context = {
         "object_list": players,
