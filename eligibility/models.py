@@ -62,9 +62,9 @@ class Person(DirtyFieldsMixin, models.Model):
         Query across Parent and GrandParent relations for all eligibilities.
         """
         countries = {self.birthplace, self.residency}
-        countries |= set(self.parent_set.values_list("birthplace", flat=True))
-        for p in self.parent_set.all():
-            countries |= set(p.grandparent_set.values_list("birthplace", flat=True))
+        for country in self.parents_birthplace + self.grandparents_birthplace:
+            if country:
+                countries.add(country)
         return sorted(countries)
 
 
@@ -91,7 +91,7 @@ class Player(Person):
         return reverse("player", kwargs={"pk": self.pk})
 
     def can_declare(self):
-        if self.parent_set.exclude(adopted=True).count() < 2:
+        if self.biological_parent_count < 2:
             raise ValueError("Must have at least two biological parents.")
         for parent in self.parent_set.all():
             if parent.grandparent_set.exclude(adopted=True).count() < 2:

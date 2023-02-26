@@ -5,7 +5,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 from guardian.decorators import permission_required
 from guardian.shortcuts import assign_perm, get_objects_for_user
 
@@ -18,13 +18,19 @@ from eligibility.forms import (
 from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
 
 
-class PlayerList(LoginRequiredMixin, ListView):
-    model = Player
-
-    def get_queryset(self):
-        return get_objects_for_user(
-            self.request.user, "eligibility.change_player", with_superuser=False
+@login_required
+def player_list(request):
+    players = (
+        get_objects_for_user(
+            request.user, "eligibility.change_player", with_superuser=False
         )
+        .eligibility_by_birth()
+        .eligibility_by_residence()
+    )
+    context = {
+        "object_list": players,
+    }
+    return TemplateResponse(request, "eligibility/player_list.html", context)
 
 
 @login_required
