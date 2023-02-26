@@ -1,4 +1,5 @@
-from django.db.models import BooleanField, Case, F, Q, Value, When
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import BooleanField, Case, F, Q, Value, When, Count
 from django.db.models.query import QuerySet
 
 
@@ -8,7 +9,7 @@ class PersonQuerySet(QuerySet):
             birthplace=Case(
                 When(country_of_birth__isnull=True, then=F("country_of_birth_other")),
                 default=F("country_of_birth__name"),
-            )
+            ),
         )
 
 
@@ -18,7 +19,22 @@ class PlayerQueryset(PersonQuerySet):
             residency=Case(
                 When(residence__isnull=True, then=F("residence_other")),
                 default=F("residence__name"),
-            )
+            ),
+            parents_birthplace=ArrayAgg(
+                "parent__country_of_birth__name", distinct=True
+            ),
+            grandparents_birthplace=ArrayAgg(
+                "parent__grandparent__country_of_birth__name", distinct=True
+            ),
+            parent_count=Count("parent__uuid"),
+            biological_parent_count=Count(
+                "parent__uuid", filter=Q(parent__adopted=False), distinct=True
+            ),
+            biological_grandparent_count=Count(
+                "parent__grandparent__uuid",
+                filter=Q(parent__grandparent__adopted=False),
+                distinct=True,
+            ),
         )
 
     def eligible_for(self, country_name):

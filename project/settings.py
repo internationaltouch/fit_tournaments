@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third-party
     "bootstrap5",
+    "debug_toolbar",
     "django_htmx",
     "guardian",
     "impersonate",
@@ -79,6 +80,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -249,6 +251,26 @@ IMPERSONATE = {
     "REDIRECT_URL": "/",
 }
 
+
+# Querycount
+# https://github.com/bradmontgomery/django-querycount
+
+QUERYCOUNT = {
+    "THRESHOLDS": {
+        "MEDIUM": 10,
+        "HIGH": 20,
+        "MIN_TIME_TO_LOG": 0,
+        "MIN_QUERY_COUNT_TO_LOG": 0,
+    },
+    "IGNORE_REQUEST_PATTERNS": [],
+    "IGNORE_SQL_PATTERNS": [],
+    "DISPLAY_DUPLICATES": 5,
+    "RESPONSE_HEADER": "X-DjangoQueryCount-Count",
+}
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # Logging
 
