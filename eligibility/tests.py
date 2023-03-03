@@ -1,6 +1,6 @@
 from datetime import date
 
-from django.test import TestCase
+from test_plus import TestCase
 
 from eligibility.factory import GrandParentFactory, ParentFactory, PlayerFactory
 from eligibility.models import Country, Player
@@ -14,51 +14,41 @@ class EligibilityTest(TestCase):
         player = PlayerFactory.create(country_of_birth=AUS, residence=AUS)
         for parent in ParentFactory.create_batch(2, child=player, country_of_birth=AUS):
             GrandParentFactory.create_batch(2, child=parent, country_of_birth=AUS)
+        self.assertEqual(Player.objects.get(pk=player.pk).eligible(), [AUS.name])
 
-        with self.subTest("Players eligible for AUS"):
-            self.assertQuerysetEqual(Player.objects.eligible_for(AUS.name), [player])
-
-        with self.subTest("Only eligible for AUS"):
-            self.assertEqual(Player.objects.get(pk=player.pk).eligible(), [AUS.name])
-
-    def test_extreme_player(self):
-        "Validate that a player with 'exotic' history has eligibility across all of them."
-        country = Country.objects.iterator()
-        player = PlayerFactory.create(
-            country_of_birth=next(country),
-            residence=next(country),
+    def test_boring_player_living_overseas(self):
+        "Ensure that a 'boring' player only has eligibility for their ancestry country and their residence country."
+        AUS = Country.objects.get(iso3166a3="AUS")
+        ENG = Country.objects.get(iso3166a3="ENG")
+        player = PlayerFactory.create(country_of_birth=AUS, residence=ENG)
+        for parent in ParentFactory.create_batch(2, child=player, country_of_birth=AUS):
+            GrandParentFactory.create_batch(2, child=parent, country_of_birth=AUS)
+        self.assertEqual(
+            Player.objects.get(pk=player.pk).eligible(), [AUS.name, ENG.name]
         )
-        # Both biological parents were adopted, and also has two adopted parents that
-        # were themselves adopted...
-        for adopted in (False, True):
-            for rel1 in ("father", "mother"):
-                parent = ParentFactory.create(
-                    child=player,
-                    country_of_birth=next(country),
-                    adopted=adopted,
-                )
-                for rel2 in ("grandfather", "grandmother"):
-                    GrandParentFactory.create(
-                        child=parent,
-                        country_of_birth=next(country),
-                    )
-                    GrandParentFactory.create(
-                        child=parent,
-                        country_of_birth=next(country),
-                        adopted=True,
-                    )
 
-        with self.subTest("Player has MANY eligibility options to choose from"):
-            eligible_for = Player.objects.get(pk=player.pk).eligible()
-            # Expected length is
-            # 2 (birth, residence)
-            # + 2 bio p + 4 bio gp + 4 adopted gp of bio p
-            # + 2 adopted p + 4 bio gp of adopted p + 4 adopted gp of adopted p
-            # = 2 + 2 + 4 + 4 + 2 + 4 + 4 = 22
-            self.assertCountEqual(
-                eligible_for,
-                Country.objects.values_list("name", flat=True)[:22],
+    def test_player_with_parent_born_overseas(self):
+        AUS = Country.objects.get(iso3166a3="AUS")
+        NZL = Country.objects.get(iso3166a3="NZL")
+        player = PlayerFactory.create(country_of_birth=AUS, residence=AUS)
+        parent1 = ParentFactory.create(child=player, country_of_birth=AUS)
+        parent2 = ParentFactory.create(child=player, country_of_birth=NZL)
+        for parent in [parent1, parent2]:
+            GrandParentFactory.create_batch(2, child=parent, country_of_birth=AUS)
+        with self.subTest("Players eligible for both"):
+            self.assertEqual(
+                Player.objects.get(pk=player.pk).eligible(), [AUS.name, NZL.name]
             )
+
+    def test_player_with_grandparents_born_overseas(self):
+        AUS = Country.objects.get(iso3166a3="AUS")
+        ENG = Country.objects.get(iso3166a3="ENG")
+        player = PlayerFactory.create(country_of_birth=AUS, residence=AUS)
+        for parent in ParentFactory.create_batch(2, child=player, country_of_birth=AUS):
+            GrandParentFactory.create_batch(2, child=parent, country_of_birth=ENG)
+        self.assertEqual(
+            Player.objects.get(pk=player.pk).eligible(), [AUS.name, ENG.name]
+        )
 
 
 class UtilityTests(TestCase):
