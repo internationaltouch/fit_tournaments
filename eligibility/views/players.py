@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
-from django.db.models import Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
@@ -37,6 +37,18 @@ def player_list(request):
                     "data", "evidence_nation"
                 ).select_related("elected_country"),
             ),
+        )
+        .prefetch_related(
+            Prefetch(
+                "parent_set",
+                queryset=Parent.objects.annotate(
+                    biological_parent_count=Count(
+                        "grandparent__uuid",
+                        filter=Q(grandparent__adopted=False),
+                        distinct=True,
+                    ),
+                ),
+            )
         )
     )
     context = {
