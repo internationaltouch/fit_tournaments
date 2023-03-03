@@ -1,7 +1,22 @@
 import factory
+from django.contrib.auth import get_user_model
 from factory.django import DjangoModelFactory
 
 from eligibility.models import Country, GrandParent, Parent, Player
+
+
+class UserFactory(DjangoModelFactory):
+    class Meta:
+        model = get_user_model()
+
+    first_name = factory.Faker("first_name")
+    last_name = factory.Faker("last_name")
+
+    username = factory.Sequence(lambda n: "user%04d" % (n + 1))
+    email = factory.Sequence(lambda n: "user%03d@example.com" % (n + 1))
+
+    password = "crypt$$azoV33FJ2h3AA"  # pre-crypted "password"
+    is_active = True
 
 
 class PlayerFactory(DjangoModelFactory):
