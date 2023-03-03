@@ -23,7 +23,10 @@ from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
 def player_list(request):
     players = (
         get_objects_for_user(
-            request.user, "eligibility.change_player", with_superuser=False
+            request.user,
+            "eligibility.change_player",
+            use_groups=True,
+            any_perm=True,
         )
         .eligibility_by_birth()
         .eligibility_by_residence()
