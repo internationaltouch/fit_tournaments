@@ -85,8 +85,8 @@ class ViewPerformanceTest(TestCase):
         ENG = Country.objects.get(iso3166a3="ENG")
 
         # Create 500 players, each with 2 parents, each with 2 grandparents.
-        # This should create 500 * (2 + 4) = 3000 ancestors.
-        players = PlayerFactory.create_batch(500)
+        cls.player_count = 500
+        players = PlayerFactory.create_batch(cls.player_count)
         for player in players:
             for parent in ParentFactory.create_batch(2, child=player):
                 GrandParentFactory.create_batch(2, child=parent)
@@ -105,9 +105,9 @@ class ViewPerformanceTest(TestCase):
         assign_perm("eligibility.change_player", cls.user, cls.first_player)
 
     def test_data(self):
-        for model, expected in [(Player, 500), (Parent, 1000), (GrandParent, 2000)]:
+        for i, model in enumerate([Player, Parent, GrandParent]):
             with self.subTest(model.__name__):
-                self.assertEqual(model.objects.count(), expected)
+                self.assertEqual(model.objects.count(), self.player_count * 2**i)
 
     def test_view__player_list__protection_anonymous(self):
         with (
@@ -119,6 +119,7 @@ class ViewPerformanceTest(TestCase):
 
     def test_view__player_list__protection_user(self):
         with self.login(self.user):
+            # XXX: try to go lower if we drive the other numbers down
             self.assertGoodView("players", test_query_count=20)
             self.assertResponseContains(
                 f'<a href="{self.first_player.get_absolute_url()}">{self.first_player}</a>'
