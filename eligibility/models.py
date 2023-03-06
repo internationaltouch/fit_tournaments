@@ -94,7 +94,11 @@ class Player(Person):
         if self.biological_parent_count < 2:
             raise ValueError("Must have at least two biological parents.")
         for parent in self.parent_set.all():
-            if parent.grandparent_set.exclude(adopted=True).count() < 2:
+            biological_parents = 0
+            for grandparent in parent.grandparent_set.all():
+                if not grandparent.adopted:
+                    biological_parents += 1
+            if biological_parents < 2:
                 raise ValueError(
                     "At least one parent does not have at least two biological parents."
                 )

@@ -23,7 +23,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for player in object_list %}
+                {% for player in page.object_list %}
                     <tr class="table-{% if not player.can_declare_bool %}danger{% elif not player.declarations.exists %}warning{% else %}default{% endif %}">
                         <td>
                             <a href="{% url 'player' player.pk %}">{{ player }}</a>
@@ -87,6 +87,11 @@
                 {% endfor %}
                 </tbody>
             </table>
+            {% if page.has_other_pages %}
+                <div class="card-body">
+                    {% bootstrap_pagination page size="small" %}
+                </div>
+            {% endif %}
             <div class="card-footer">
                 {% url 'player' as add_player_url %}
                 {% bootstrap_button "Add a player" button_type="link" href=add_player_url %}
