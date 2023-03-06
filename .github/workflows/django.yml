@@ -1,7 +1,6 @@
-name: Django CI
+name: tox
 
 on:
-  push:
   pull_request:
     branches:
     - main
