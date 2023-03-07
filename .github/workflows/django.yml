@@ -44,6 +44,7 @@ jobs:
           python -m pip install tox tox-docker
       - name: Run Tests
         run: |
+          pg_dump $DATABASE_URL
           tox
         env:
-          DATABASE_URL: psql://tournaments:tournaments@postgres:5432/tournaments
+          DATABASE_URL: postgres://tournaments:tournaments@localhost:5432/tournaments
