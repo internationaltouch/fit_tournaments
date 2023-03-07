@@ -23,7 +23,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for player in player_list %}
+                {% for player in object_list %}
                     <tr class="table-{% if not player.can_declare_bool %}danger{% elif not player.declarations.exists %}warning{% else %}default{% endif %}">
                         <td>
                             <a href="{% url 'player' player.pk %}">{{ player }}</a>

@@ -12,4 +12,5 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("accounts/", include("userprofile.urls")),
     path("sentry-debug", trigger_error),
+    path("__debug__/", include("debug_toolbar.urls")),
 ]
