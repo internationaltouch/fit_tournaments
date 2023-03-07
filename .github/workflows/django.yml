@@ -44,4 +44,4 @@ jobs:
       run: |
         tox
       env:
-        DATABASE_URL: psql://tournaments:tournaments@localhost:5432/tournaments
+        DATABASE_URL: psql://tournaments:tournaments@postgres:5432/tournaments
