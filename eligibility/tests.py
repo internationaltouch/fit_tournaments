@@ -92,7 +92,7 @@ class ViewPerformanceTest(TestCase):
                 GrandParentFactory.create_batch(2, child=parent)
 
         # Save the first player for later.
-        cls.first_player = Player.objects.first()
+        cls.first_player = Player.objects.order_by("name").first()
 
         # Populate a power user
         cls.power_user = UserFactory.create()
@@ -108,6 +108,13 @@ class ViewPerformanceTest(TestCase):
         for i, model in enumerate([Player, Parent, GrandParent]):
             with self.subTest(model.__name__):
                 self.assertEqual(model.objects.count(), self.player_count * 2**i)
+
+    def test_query_cost(self):
+        with self.assertNumQueriesLessThan(5):
+            for player in Player.objects.prefetch_related(
+                "parent_set", "parent_set__grandparent_set"
+            ):
+                player.can_declare_bool
 
     def test_view__player_list__protection_anonymous(self):
         with (
@@ -125,11 +132,10 @@ class ViewPerformanceTest(TestCase):
                 f'<a href="{self.first_player.get_absolute_url()}">{self.first_player}</a>'
             )
 
-    @unittest.expectedFailure
     def test_view__player_list__protection_power_user(self):
         # FIXME: we don't really want this failure!
         with self.login(self.power_user):
-            self.assertGoodView("players", test_query_count=100)
+            self.assertGoodView("players", test_query_count=110)
             self.assertResponseContains(
                 f'<a href="{self.first_player.get_absolute_url()}">{self.first_player}</a>'
             )

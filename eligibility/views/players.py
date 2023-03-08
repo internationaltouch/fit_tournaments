@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
+from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
@@ -21,7 +22,7 @@ from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
 
 @login_required
 def player_list(request):
-    players = (
+    object_list = (
         get_objects_for_user(
             request.user,
             "eligibility.change_player",
@@ -50,9 +51,16 @@ def player_list(request):
                 ),
             )
         )
+        .order_by("name")
     )
+
+    paginator = Paginator(object_list, 50)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        "object_list": players,
+        "object_list": object_list,
+        "page": page_obj,
     }
     return TemplateResponse(request, "eligibility/player_list.html", context)
 
