@@ -125,6 +125,11 @@ DATABASES = {"default": env.db(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
 # Tuning, set persistent connections to the database
 DATABASES["default"]["CONN_MAX_AGE"] = 0 if DEBUG else 600
 
+# Convenience for testing with a preserved database from test runner
+if DEBUG and DATABASES["default"]["NAME"].startswith("test_"):
+    PASSWORD_HASHERS = ("django.contrib.auth.hashers.CryptPasswordHasher",)
+
+
 # Email
 # https://docs.djangoproject.com/en/3.2/ref/settings/#email-backend
 
