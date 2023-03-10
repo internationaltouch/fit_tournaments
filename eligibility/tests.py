@@ -1,4 +1,4 @@
-import unittest
+import random
 from datetime import date
 
 from django.contrib.auth.models import Permission
@@ -10,6 +10,7 @@ from eligibility.factory import (
     GrandParentFactory,
     ParentFactory,
     PlayerFactory,
+    SuperuserFactory,
     UserFactory,
 )
 from eligibility.models import Country, GrandParent, Parent, Player
@@ -114,6 +115,7 @@ class ViewPerformanceTest(TestCase):
             for player in Player.objects.prefetch_related(
                 "parent_set", "parent_set__grandparent_set"
             ):
+                # We don't care about the result, just the cost.
                 player.can_declare_bool
 
     def test_view__player_list__protection_anonymous(self):
@@ -138,4 +140,116 @@ class ViewPerformanceTest(TestCase):
             self.assertGoodView("players", test_query_count=110)
             self.assertResponseContains(
                 f'<a href="{self.first_player.get_absolute_url()}">{self.first_player}</a>'
+            )
+
+
+@override_settings(PASSWORD_HASHERS=PASSWORD_HASHERS)
+class AdminViewTests(TestCase):
+    """
+    Basic set of tests to make sure the regular admin pages will not be too slow to
+    provide support when we launch. These tests are not intended to be exhaustive, we
+    are focussing on list views as they are the most likely to be slow because of ORM
+    performance issues when making naive queries.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        # Set our query count aspirations, so we can adjust them as we go.
+        cls.test_query_count = 110  # FIXME: I would like to get this down!
+
+        cls.user = SuperuserFactory.create()
+
+        # Create 500 players, each with 2 parents, each with 2 grandparents.
+        cls.player_count = 500
+        for player in PlayerFactory.create_batch(cls.player_count):
+            for parent in ParentFactory.create_batch(2, child=player):
+                GrandParentFactory.create_batch(2, child=parent)
+            assign_perm("eligibility.change_player", cls.user, player)
+
+        cls.country_map = {
+            name: iso3166a3
+            for name, iso3166a3 in Country.objects.values_list("name", "iso3166a3")
+        }
+
+    def test_players(self):
+        with self.login(self.user):
+            for player in Player.objects.order_by("?")[:250]:
+                country = random.choice(player.eligible())
+                iso3166a3 = self.country_map[country]
+                with self.subTest(player=player, country=country, iso3166a3=iso3166a3):
+                    self.post(
+                        "declaration",
+                        player=player.uuid,
+                        data={"elected_country": iso3166a3},
+                    )
+                    self.response_302()
+
+            with self.subTest():
+                self.assertGoodView(
+                    "admin:eligibility_player_changelist",
+                    test_query_count=self.test_query_count,
+                )
+
+            with self.subTest("DecadeBornListFilter"):
+                self.assertGoodView(
+                    "admin:eligibility_player_changelist",
+                    test_query_count=self.test_query_count,
+                    data={"decade": "1990"},
+                )
+
+            with self.subTest("EligibilityListFilter"):
+                self.assertGoodView(
+                    "admin:eligibility_player_changelist",
+                    test_query_count=self.test_query_count,
+                    data={"eligible": "Australia"},
+                )
+
+            with self.subTest("DecadeBornListFilter and EligibilityListFilter"):
+                self.assertGoodView(
+                    "admin:eligibility_player_changelist",
+                    test_query_count=self.test_query_count,
+                    data={"decade": "1990", "eligible": "Australia"},
+                )
+
+    def test_parents(self):
+        with self.login(self.user):
+            self.assertGoodView(
+                "admin:eligibility_parent_changelist",
+                test_query_count=self.test_query_count,
+            )
+
+    def test_grandparents(self):
+        with self.login(self.user):
+            self.assertGoodView(
+                "admin:eligibility_grandparent_changelist",
+                test_query_count=self.test_query_count,
+            )
+
+    def test_playerdeclaration(self):
+        with self.login(self.user):
+            for player in Player.objects.order_by("?")[:250]:
+                country = random.choice(player.eligible())
+                self.post(
+                    "declaration",
+                    player=player.uuid,
+                    data={"elected_country": country},
+                )
+
+            self.assertGoodView(
+                "admin:eligibility_playerdeclaration_changelist",
+                test_query_count=self.test_query_count,
+            )
+
+    def test_nationalsquad(self):
+        with self.login(self.user):
+            self.assertGoodView(
+                "admin:eligibility_nationalsquad_changelist",
+                test_query_count=self.test_query_count,
+            )
+
+    def test_nationalteam(self):
+        with self.login(self.user):
+            self.assertGoodView(
+                "admin:eligibility_nationalteam_changelist",
+                test_query_count=self.test_query_count,
             )

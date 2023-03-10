@@ -19,6 +19,11 @@ class UserFactory(DjangoModelFactory):
     is_active = True
 
 
+class SuperuserFactory(UserFactory):
+    is_superuser = True
+    is_staff = True
+
+
 class PlayerFactory(DjangoModelFactory):
     class Meta:
         model = Player
