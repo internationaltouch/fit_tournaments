@@ -1,7 +1,7 @@
 import random
 from datetime import date
 
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group, Permission
 from django.test import override_settings
 from guardian.shortcuts import assign_perm
 from test_plus import TestCase
@@ -100,10 +100,19 @@ class ViewPerformanceTest(TestCase):
         # Grant permission to the user to change ALL players.
         perm = Permission.objects.get(codename="change_player")
         cls.power_user.user_permissions.set([perm])
+        assign_perm("eligibility.change_player", cls.power_user, cls.first_player)
+
+        # Populate a NTO user
+        cls.nto_user = UserFactory.create()
 
         # Populate a regular user with permission to change only the first player.
         cls.user = UserFactory.create()
         assign_perm("eligibility.change_player", cls.user, cls.first_player)
+
+        cls.country_map = {
+            name: iso3166a3
+            for name, iso3166a3 in Country.objects.values_list("name", "iso3166a3")
+        }
 
     def test_data(self):
         for i, model in enumerate([Player, Parent, GrandParent]):
@@ -141,6 +150,52 @@ class ViewPerformanceTest(TestCase):
             self.assertResponseContains(
                 f'<a href="{self.first_player.get_absolute_url()}">{self.first_player}</a>'
             )
+
+    def test_view__declaration_list__protection_anonymous(self):
+        with (
+            self.subTest("Queries"),
+            self.assertNumQueriesLessThan(5),
+            self.subTest("Anonymous"),
+        ):
+            self.assertLoginRequired("nations")
+
+    def test_view__declaration_list__protection_nto_user(self):
+        country = random.choice(self.first_player.eligible())
+        iso3166a3 = self.country_map[country]
+
+        with self.login(self.user):
+            with self.subTest(
+                "Make declaration by regular user for player",
+                user=self.power_user,
+                player=self.first_player,
+                country=country,
+                iso3166a3=iso3166a3,
+            ):
+                response = self.post(
+                    "declaration",
+                    player=self.first_player.uuid,
+                    data={"elected_country": iso3166a3},
+                )
+                self.assertRedirects(response, self.reverse("players"))
+
+            with self.subTest(
+                "Ensure regular user can't access NTO pages",
+                user=self.user,
+            ):
+                self.get("nations")
+                self.response_403()
+
+        # After enrolling this player, the NTO user needs to be linked to the Group
+        # that was created for the country.
+        self.nto_user.groups.add(Group.objects.get(name=country))
+
+        with self.login(self.nto_user):
+            with self.subTest(user=self.nto_user):
+                self.assertGoodView("nations", test_query_count=50)
+            with self.subTest(user=self.nto_user):
+                self.assertResponseContains(
+                    f'<a href="{self.first_player.get_absolute_url()}">{self.first_player}</a>'
+                )
 
 
 @override_settings(PASSWORD_HASHERS=PASSWORD_HASHERS)
@@ -235,10 +290,17 @@ class AdminViewTests(TestCase):
                     data={"elected_country": country},
                 )
 
-            self.assertGoodView(
-                "admin:eligibility_playerdeclaration_changelist",
-                test_query_count=self.test_query_count,
-            )
+            with self.subTest():
+                self.assertGoodView(
+                    "admin:eligibility_playerdeclaration_changelist",
+                    test_query_count=self.test_query_count,
+                )
+
+            with self.subTest("ElectedCountryListFilter"):
+                self.assertGoodView(
+                    "admin:eligibility_playerdeclaration_changelist",
+                    data={"country": "England"},
+                )
 
     def test_nationalsquad(self):
         with self.login(self.user):
@@ -251,5 +313,12 @@ class AdminViewTests(TestCase):
         with self.login(self.user):
             self.assertGoodView(
                 "admin:eligibility_nationalteam_changelist",
+                test_query_count=self.test_query_count,
+            )
+
+    def test_country(self):
+        with self.login(self.user):
+            self.assertGoodView(
+                "admin:eligibility_country_changelist",
                 test_query_count=self.test_query_count,
             )

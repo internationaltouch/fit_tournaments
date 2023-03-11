@@ -153,6 +153,8 @@ sqlparse==0.4.3
     #   -r requirements.txt
     #   django
     #   django-debug-toolbar
+tblib==1.7.0
+    # via -r test-requirements.in
 tomli==2.0.1
     # via
     #   -r requirements.txt
