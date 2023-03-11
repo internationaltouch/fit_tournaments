@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import collections
+import multiprocessing
 from pathlib import Path
 
 import environ
@@ -22,6 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env")
+
+if env("DJANGO_TEST_PROCESSES", default=None):
+    multiprocessing.set_start_method("fork")
+
+
+# Sentry
 
 sentry_sdk.init(
     dsn=env("SENTRY_DSN", default=""),

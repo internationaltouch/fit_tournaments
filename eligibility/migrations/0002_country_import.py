@@ -7,14 +7,50 @@ from django.db import migrations
 def country_import(apps, schema_editor):
     Country = apps.get_model("eligibility", "Country")
 
-    res = requests.get(
-        "https://www.internationaltouch.org/api/v1/clubs/",
-        headers={
-            "Accept": "application/json",
-            "User-Agent": "tournaments.fit/0.1",
-        },
-    )
-    res.raise_for_status()
+    try:
+        res = requests.get(
+            "https://www.internationaltouch.org/api/v1/clubs/",
+            headers={
+                "Accept": "application/json",
+                "User-Agent": "tournaments.fit/0.1",
+            },
+            timeout=2,
+        )
+        res.raise_for_status()
+        api_data = res.json()
+    except requests.RequestException:  # noqa
+        api_data = [
+            {"abbreviation": "AUS", "title": "Australia"},
+            {"abbreviation": "BEL", "title": "Belgium"},
+            {"abbreviation": "BGR", "title": "Bulgaria"},
+            {"abbreviation": "CAN", "title": "Canada"},
+            {"abbreviation": "CHE", "title": "Switzerland"},
+            {"abbreviation": "COK", "title": "Cook Islands"},
+            {"abbreviation": "CZE", "title": "Czech Republic"},
+            {"abbreviation": "DEU", "title": "Germany"},
+            {"abbreviation": "ENG", "title": "England"},
+            {"abbreviation": "ESP", "title": "Spain"},
+            {"abbreviation": "FJI", "title": "Fiji"},
+            {"abbreviation": "FRA", "title": "France"},
+            {"abbreviation": "HKG", "title": "Hong Kong"},
+            {"abbreviation": "IRE", "title": "Ireland"},
+            {"abbreviation": "ITA", "title": "Italy"},
+            {"abbreviation": "JPN", "title": "Japan"},
+            {"abbreviation": "LUX", "title": "Luxembourg"},
+            {"abbreviation": "MYS", "title": "Malaysia"},
+            {"abbreviation": "NLD", "title": "Netherlands"},
+            {"abbreviation": "NZL", "title": "New Zealand"},
+            {"abbreviation": "PHL", "title": "Philippines"},
+            {"abbreviation": "PNG", "title": "Papua New Guinea"},
+            {"abbreviation": "SCO", "title": "Scotland"},
+            {"abbreviation": "SGP", "title": "Singapore"},
+            {"abbreviation": "SWE", "title": "Sweden"},
+            {"abbreviation": "THA", "title": "Thailand"},
+            {"abbreviation": "TON", "title": "Tonga"},
+            {"abbreviation": "USA", "title": "United States of America"},
+            {"abbreviation": "WAL", "title": "Wales"},
+            {"abbreviation": "WSM", "title": "Samoa"},
+        ]
 
     # Unfortunately, we need to special case a few out of the API response.
     exceptions = {
@@ -27,7 +63,7 @@ def country_import(apps, schema_editor):
 
     instances = [
         Country(iso3166a3=each["abbreviation"], name=each["title"])
-        for each in res.json()
+        for each in api_data
         if each["abbreviation"] not in exceptions
     ]
 
