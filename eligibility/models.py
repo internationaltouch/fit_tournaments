@@ -1,5 +1,5 @@
 import uuid
-from typing import Any, List
+from typing import List
 
 from dirtyfields import DirtyFieldsMixin
 from django.contrib.auth import get_user_model
@@ -62,9 +62,9 @@ class Person(DirtyFieldsMixin, models.Model):
         Query across Parent and GrandParent relations for all eligibilities.
         """
         countries = {self.birthplace, self.residency}
-        countries |= set(self.parent_set.values_list("birthplace", flat=True))
-        for p in self.parent_set.all():
-            countries |= set(p.grandparent_set.values_list("birthplace", flat=True))
+        for country in self.parents_birthplace + self.grandparents_birthplace:
+            if country:
+                countries.add(country)
         return sorted(countries)
 
 
@@ -91,7 +91,7 @@ class Player(Person):
         return reverse("player", kwargs={"pk": self.pk})
 
     def can_declare(self):
-        if self.parent_set.exclude(adopted=True).count() < 2:
+        if self.biological_parent_count < 2:
             raise ValueError("Must have at least two biological parents.")
         for parent in self.parent_set.all():
             if parent.grandparent_set.exclude(adopted=True).count() < 2:
@@ -211,18 +211,20 @@ class PlayerDeclaration(models.Model):
 
     def newly_added_ancestors(self):
         """
-        The following ancestors were not recorded when the declaration was made; this can change the eligibility
-        standing of the individual _if_ an ancestor was born in a country not already seen amongst the other ancestors.
+        The following ancestors were not recorded when the declaration was made; this
+        can change the eligibility standing of the individual _if_ an ancestor was born
+        in a country not already seen amongst the other ancestors.
         """
         pks = [s.pk for s in self.data]
         ancestors = [
-            p for p in Parent.objects.filter(child=self.player).exclude(pk__in=pks)
+            parent
+            for parent in Parent.objects.filter(child=self.player).exclude(pk__in=pks)
         ]
         ancestors += [
-            gp
-            for gp in GrandParent.objects.filter(child__child=self.player).exclude(
-                pk__in=pks
-            )
+            grandparent
+            for grandparent in GrandParent.objects.filter(
+                child__child=self.player
+            ).exclude(pk__in=pks)
         ]
         return ancestors
 
@@ -234,3 +236,55 @@ class PlayerDeclaration(models.Model):
 
     def clean(self):
         person_declaration_clean(self)
+
+
+class Event(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    name = models.CharField(max_length=256)
+    closing_date = models.DateField(
+        blank=True, null=True, help_text="Closing date for nominations."
+    )
+    team_date = models.DateField(
+        blank=True, null=True, help_text="Two weeks prior to closing date."
+    )
+    squad_date = models.DateField(
+        blank=True, null=True, help_text="Three months prior to closing date."
+    )
+
+    class Meta:
+        ordering = ("closing_date",)
+
+    def __str__(self):
+        return self.name
+
+
+class NationalSquad(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    event = models.ForeignKey(Event, related_name="squads", on_delete=models.PROTECT)
+    name = models.CharField(max_length=256)
+    players = models.ManyToManyField(
+        PlayerDeclaration,
+        blank=True,
+        limit_choices_to=models.Q(supersceded_by__isnull=True),
+    )
+
+    class Meta:
+        unique_together = ("event", "name")
+        ordering = ("event", "name")
+
+    def __str__(self):
+        return f"{self.name} - {self.event.name}"
+
+
+class NationalTeam(models.Model):
+    squad = models.OneToOneField(
+        NationalSquad, primary_key=True, on_delete=models.PROTECT, editable=False
+    )
+    players = models.ManyToManyField(PlayerDeclaration, blank=True)
+
+    class Meta:
+        unique_together = ("squad",)
+        ordering = ("squad",)
+
+    def __str__(self):
+        return f"{self.squad.name} - {self.squad.event.name}"

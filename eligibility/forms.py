@@ -1,8 +1,19 @@
 from django import forms
-from django.forms import BaseFormSet
+from django.db.models import Q
+from django.forms import BaseFormSet, BaseInlineFormSet, modelformset_factory
+from django.utils.safestring import mark_safe
+from guardian.shortcuts import get_objects_for_user
 from modelforms.forms import ModelForm
 
-from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
+from eligibility.models import (
+    GrandParent,
+    NationalSquad,
+    NationalTeam,
+    Parent,
+    Player,
+    PlayerDeclaration,
+)
+from eligibility.utils import get_age
 
 
 class PlayerForm(forms.ModelForm):
@@ -83,3 +94,100 @@ class SightingFormSet(BaseFormSet):
         field.label = label
         field.widget.attrs["placeholder"] = placeholder
         field.help_text = help_text
+
+
+class NationalSquadForm(forms.ModelForm):
+    class Meta:
+        model = NationalSquad
+        fields = ("players",)
+
+
+class PlayerDeclarationMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        res = f"{obj.player} ({get_age(obj.player)})"
+        for country in obj.eligible_for:
+            if obj.supersceded_by:
+                color = (
+                    "danger"
+                    if country == obj.supersceded_by.elected_country.name
+                    else "secondary"
+                )
+            else:
+                color = (
+                    "success" if country == obj.elected_country.name else "secondary"
+                )
+            res += f' <span class="badge bg-{color}">{country}</span>'
+        return mark_safe(res)
+
+
+class NationalSquadFormSet(BaseInlineFormSet):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def add_fields(self, form, index):
+        super().add_fields(form, index)
+        queryset = (
+            get_objects_for_user(
+                self.user,
+                "eligibility.view_playerdeclaration",
+                use_groups=True,
+                any_perm=True,
+            )
+            .filter(elected_country__name=form.instance.name)
+            .filter(
+                Q(
+                    # If a declaration has been superseded we do not want to use it.
+                    supersceded_by__isnull=True,
+                    # If the nation has not recorded that they've verified the
+                    # eligibility standing of the individual in the declaration, we
+                    # don't want them to be able to select them.
+                    evidence_nation__isnull=False,
+                )
+                |
+                # We want to make sure that already selected items remain in the
+                # queryset, even if they've subsequently gone out of scope; we can
+                # give the nation visual feedback.
+                Q(pk__in=form.instance.players.all())
+            )
+        )
+        form.fields["players"] = PlayerDeclarationMultipleChoiceField(
+            queryset=queryset,
+            required=False,
+            widget=forms.CheckboxSelectMultiple,
+            help_text=(
+                f"Select the names of players dual-eligible for {form.instance.name} "
+                f"that you are naming in the squad. Only players included in this "
+                f"squad will be able to be progressed to the final teams."
+            ),
+        )
+
+
+class NationalTeamForm(ModelForm):
+    class Meta:
+        model = NationalTeam
+        fields = ("players",)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["players"] = PlayerDeclarationMultipleChoiceField(
+            queryset=(
+                self.instance.squad.players.exclude(supersceded_by__isnull=False)
+                | self.instance.players.all()
+            ),
+            required=False,
+            widget=forms.CheckboxSelectMultiple,
+            help_text=(
+                f"Select the names of players dual-eligible for {self.instance.squad.name} "
+                f"that you are naming in one of your final <strong>teams</strong>."
+            ),
+        )
+
+
+NationalTeamFormSet = modelformset_factory(
+    NationalTeam,
+    form=NationalTeamForm,
+    fields=("players",),
+    extra=0,
+    can_delete=False,
+)

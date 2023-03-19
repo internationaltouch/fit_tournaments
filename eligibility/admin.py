@@ -9,7 +9,16 @@ from eligibility.filters import (
     EligibilityListFilter,
     IsSuperscededListFilter,
 )
-from eligibility.models import Country, GrandParent, Parent, Player, PlayerDeclaration
+from eligibility.models import (
+    Country,
+    Event,
+    GrandParent,
+    NationalSquad,
+    NationalTeam,
+    Parent,
+    Player,
+    PlayerDeclaration,
+)
 
 
 class GrandParentInline(nested_admin.NestedTabularInline):
@@ -85,3 +94,19 @@ class PlayerDeclarationAdmin(GuardedModelAdmin):
         "data",
         "evidence_nation",
     )
+
+
+@admin.register(Event)
+class EventAdmin(GuardedModelAdmin):
+    list_display = ("name", "closing_date", "team_date", "squad_date")
+    list_filter = ("closing_date", "team_date", "squad_date")
+    list_editable = ("closing_date", "team_date", "squad_date")
+
+
+@admin.register(NationalSquad)
+class NationalSquadAdmin(GuardedModelAdmin):
+    list_display = ("name", "event")
+    list_filter = ("event",)
+
+
+admin.site.register(NationalTeam, GuardedModelAdmin)

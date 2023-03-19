@@ -1,0 +1,47 @@
+{% extends "simple.html" %}
+{% load bootstrap5 eligibility_tags %}
+
+{% block card_title %}{{ object_list|type|title }} Notice{% endblock %}
+
+{% block card_body %}
+    <h4 class="card-title">{{ object_list|type|title }} Declaration{{ object_list.count|pluralize }}</h4>
+
+    <p>On this page, Tier One Nations notify FIT which dual-eligible players have been included in their
+        {{ object_list|type }}{{ object_list.count|pluralize }} for the <strong>{{ object }}</strong>.</p>
+
+    <p>The final day to update this {{ object_list|type }} declaration is <strong>{{ due_date }}</strong>. After this date,
+        you will no longer be able to make changes.</p>
+
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        {% for form in formset.forms %}
+            {% cycle 'odd' 'even' as row silent %}
+            {% if row == 'odd' %}<div class="row mb-3">{% endif %}
+                <div class="{% if forloop.first and forloop.last %}col{% else %}col-sm-6{% endif %}">
+                    <div class="card">
+                        <h5 class="card-header">
+                            {% if object_list|type == "national team" %}
+                                {{ form.instance.squad.name }}
+                            {% else %}
+                                {{ form.instance.name }}
+                            {% endif %}
+                        </h5>
+                        <div class="card-body pb-0">
+                            {% if not form.players.field.queryset.exists %}
+                                {% if object_list|type == "national team" %}
+                                    {% bootstrap_alert "You have no squad players to include in this team." alert_type="danger" dismissible=False %}
+                                {% else %}
+                                    {% bootstrap_alert "You have not verified any players to include in this squad." alert_type="warning" %}
+                                {% endif %}
+                            {% endif %}
+                            {% bootstrap_form form layout="horizontal" %}
+                        </div>
+                    </div>
+                </div>
+            {% if forloop.last or row == 'even' %}</div>{% endif %}
+        {% endfor %}
+        {# TODO: rework the template to allow the button in the outer card footer #}
+        {% bootstrap_button "Save" %}
+    </form>
+{% endblock card_body %}

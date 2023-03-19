@@ -23,7 +23,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for player in player_list %}
+                {% for player in object_list %}
                     <tr class="table-{% if not player.can_declare_bool %}danger{% elif not player.declarations.exists %}warning{% else %}default{% endif %}">
                         <td>
                             <a href="{% url 'player' player.pk %}">{{ player }}</a>
@@ -40,7 +40,7 @@
                         </td>
                         <td>
                             {% with player.declarations.first as declaration %}
-                                {% url 'declaration' player.pk as declaration_url %}
+                                {% url 'declaration' player=player.pk as declaration_url %}
                                 {% if declaration.pk %}
                                     {% url 'declaration' player.pk declaration.pk as url %}
                                     <a href="{{ url }}">{{ declaration.elected_country }}</a>

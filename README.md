@@ -16,9 +16,9 @@ Once the profile is created, the person will be required to make their declarati
 
 The salient point is that prior to the closing date for final registrations for that event, the player must nominate which country they elect to play for at that event.
 
-Further, Tier One nations must declare which dual-qualified players are in their training squads (three months prior to final nominations) and then teams (two weeks prior to final nominations).
+Further, Tier One Nations must declare which dual-qualified players are in their training squads (three months prior to final nominations) and then teams (two weeks prior to final nominations).
 
-In order to facilitate this, only players who have made their declarations to align to a country will be able to be claimed, and only with a declaration by an official of the Tier One nation that they've cited necessary documentation that corroborates the claim of eligibility.
+In order to facilitate this, only players who have made their declarations to align to a country will be able to be claimed, and only with a declaration by an official of the Tier One Nation that they've cited necessary documentation that corroborates the claim of eligibility.
 
 ## Prototype
 

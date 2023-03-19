@@ -2,6 +2,7 @@ import json
 
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.utils import timezone
 
 
 def boolean_coerce(value):
@@ -101,3 +102,16 @@ def person_declaration_clean(instance):
 
     if errors:
         raise ValidationError(errors)
+
+
+def get_age(person, census_date=None):
+    if census_date is None:
+        census_date = timezone.now().today()
+    return (
+        census_date.year
+        - person.date_of_birth.year
+        - (
+            (census_date.month, census_date.day)
+            < (person.date_of_birth.month, person.date_of_birth.day)
+        )
+    )

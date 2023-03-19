@@ -1,0 +1,29 @@
+{% extends "simple.html" %}
+{% load bootstrap5 eligibility_tags %}
+
+{% block card_title %}{{ object_list|type|title }} Notice{% endblock %}
+
+{% block card_body %}
+    <p>The following {{ object_list|type }}{{ object_list.count|pluralize }}
+        {{ object_list.count|pluralize:"was,were" }} locked in at the end of {{ due_date }}.</p>
+
+    {% for squad in object_list %}
+        {% cycle 'odd' 'even' as row silent %}
+        <div class="card mb-3">
+            <h5 class="card-header text-center">{{ squad }}</h5>
+            <ul class="list-group list-group-flush">
+                {% for player in squad.players.all %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ player.name }}
+                        {% if player.supersceded_by %}<span class="badge bg-danger">Superseded</span>{% endif %}
+                        <span class="badge bg-secondary">{{ player.timestamp|timesince }} ago</span>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">
+                        <em>No players declared.</em>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+{% endblock %}

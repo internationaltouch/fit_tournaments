@@ -1,11 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
+from django.db.models import Count, Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView
 from guardian.decorators import permission_required
 from guardian.shortcuts import assign_perm, get_objects_for_user
 
@@ -18,13 +19,42 @@ from eligibility.forms import (
 from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
 
 
-class PlayerList(LoginRequiredMixin, ListView):
-    model = Player
-
-    def get_queryset(self):
-        return get_objects_for_user(
-            self.request.user, "eligibility.change_player", with_superuser=False
+@login_required
+def player_list(request):
+    players = (
+        get_objects_for_user(
+            request.user,
+            "eligibility.change_player",
+            use_groups=True,
+            any_perm=True,
         )
+        .eligibility_by_birth()
+        .eligibility_by_residence()
+        .prefetch_related(
+            Prefetch(
+                "declarations",
+                queryset=PlayerDeclaration.objects.defer(
+                    "data", "evidence_nation"
+                ).select_related("elected_country"),
+            ),
+        )
+        .prefetch_related(
+            Prefetch(
+                "parent_set",
+                queryset=Parent.objects.annotate(
+                    biological_parent_count=Count(
+                        "grandparent__uuid",
+                        filter=Q(grandparent__adopted=False),
+                        distinct=True,
+                    ),
+                ),
+            )
+        )
+    )
+    context = {
+        "object_list": players,
+    }
+    return TemplateResponse(request, "eligibility/player_list.html", context)
 
 
 @login_required

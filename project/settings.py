@@ -14,12 +14,30 @@ import collections
 from pathlib import Path
 
 import environ
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env")
+
+sentry_sdk.init(
+    dsn=env("SENTRY_DSN", default=""),
+    integrations=[
+        DjangoIntegration(),
+    ],
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0,
+
+    # If you wish to associate users to errors (assuming you are using
+    # django.contrib.auth) you may enable sending PII data.
+    send_default_pii=True
+)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -48,6 +66,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third-party
     "bootstrap5",
+    "debug_toolbar",
     "django_htmx",
     "guardian",
     "impersonate",
@@ -61,6 +80,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -102,6 +122,8 @@ WSGI_APPLICATION = "project.wsgi.application"
 
 DATABASES = {"default": env.db(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
 
+# Tuning, set persistent connections to the database
+DATABASES["default"]["CONN_MAX_AGE"] = 0 if DEBUG else 600
 
 # Email
 # https://docs.djangoproject.com/en/3.2/ref/settings/#email-backend
@@ -229,6 +251,26 @@ IMPERSONATE = {
     "REDIRECT_URL": "/",
 }
 
+
+# Querycount
+# https://github.com/bradmontgomery/django-querycount
+
+QUERYCOUNT = {
+    "THRESHOLDS": {
+        "MEDIUM": 10,
+        "HIGH": 20,
+        "MIN_TIME_TO_LOG": 0,
+        "MIN_QUERY_COUNT_TO_LOG": 0,
+    },
+    "IGNORE_REQUEST_PATTERNS": [],
+    "IGNORE_SQL_PATTERNS": [],
+    "DISPLAY_DUPLICATES": 5,
+    "RESPONSE_HEADER": "X-DjangoQueryCount-Count",
+}
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 # Logging
 
