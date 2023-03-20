@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import collections
+import multiprocessing
 from pathlib import Path
 
 import environ
@@ -22,6 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env")
+
+if env("DJANGO_TEST_PROCESSES", default=None):
+    multiprocessing.set_start_method("fork")
+
+
+# Sentry
 
 sentry_sdk.init(
     dsn=env("SENTRY_DSN", default=""),
@@ -124,6 +131,11 @@ DATABASES = {"default": env.db(default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")}
 
 # Tuning, set persistent connections to the database
 DATABASES["default"]["CONN_MAX_AGE"] = 0 if DEBUG else 600
+
+# Convenience for testing with a preserved database from test runner
+if DEBUG and DATABASES["default"]["NAME"].startswith("test_"):
+    PASSWORD_HASHERS = ("django.contrib.auth.hashers.CryptPasswordHasher",)
+
 
 # Email
 # https://docs.djangoproject.com/en/3.2/ref/settings/#email-backend
