@@ -8,6 +8,11 @@
     "mtxr.sqltools",
     "mtxr.sqltools-driver-pg"
   ],
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1": {
+      "version": "latest"
+    }
+  },
   "settings": {
     "sqltools.connections": [
       {
