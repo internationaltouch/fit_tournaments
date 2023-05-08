@@ -44,6 +44,10 @@ class Person(DirtyFieldsMixin, models.Model):
         help_text="Only valid if not one of the countries listed above.",
     )
 
+    # Allow exceptions to the minimums
+    exceptions = models.TextField(blank=True, null=True)
+    min_biological_parents = models.PositiveSmallIntegerField(blank=True, null=True)
+
     class Meta:
         abstract = True
         ordering = ("name",)
@@ -91,16 +95,21 @@ class Player(Person):
         return reverse("player", kwargs={"pk": self.pk})
 
     def can_declare(self):
-        if self.biological_parent_count < 2:
-            raise ValueError("Must have at least two biological parents.")
+        min_biological_parents = self.min_biological_parents or 2
+        if self.biological_parent_count < min_biological_parents:
+            raise ValueError(
+                f"Must have at least {min_biological_parents} biological parents."
+            )
         for parent in self.parent_set.all():
             biological_parents = 0
+            min_biological_parents = parent.min_biological_parents or 2
             for grandparent in parent.grandparent_set.all():
                 if not grandparent.adopted:
                     biological_parents += 1
-            if biological_parents < 2:
+            if biological_parents < min_biological_parents:
                 raise ValueError(
-                    "At least one parent does not have at least two biological parents."
+                    f"At least one parent does not have at least "
+                    f"{min_biological_parents} biological parents."
                 )
 
     @cached_property
