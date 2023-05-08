@@ -62,6 +62,182 @@ class EligibilityTest(TestCase):
             Player.objects.get(pk=player.pk).eligible(), [AUS.name, ENG.name]
         )
 
+    def test_player_with_unknown_parent(self):
+        ENG = Country.objects.get(iso3166a3="ENG")
+        player = PlayerFactory.create(
+            country_of_birth=ENG, residence=ENG, min_biological_parents=1
+        )
+        player = Player.objects.get(pk=player.pk)
+
+        with self.subTest(
+            "Must fail before the parent is added"
+        ), self.assertRaisesRegex(ValueError, "at least 1 biological"):
+            player.can_declare()
+
+        parent = ParentFactory.create(child=player, country_of_birth=ENG)
+        player = Player.objects.get(pk=player.pk)
+
+        with self.subTest(
+            "Must fail before the grandparents are added"
+        ), self.assertRaisesRegex(ValueError, "at least 2 biological"):
+            player.can_declare()
+
+        GrandParentFactory.create_batch(2, child=parent, country_of_birth=ENG)
+
+        with self.subTest("Must pass after we have one parent with both parents"):
+            self.assertIsNone(player.can_declare())
+
+
+@override_settings(PASSWORD_HASHERS=PASSWORD_HASHERS)
+class UserExceptionTest(TestCase):
+    def test_player_with_unknown_parent(self):
+        with self.login(self.make_user()):
+            with self.subTest("Create a player entry"):
+                self.post(
+                    "player",
+                    data={
+                        "name": "Joe Bloggs",
+                        "date_of_birth": "2001-12-18",
+                        "country_of_birth": "ENG",
+                        "residence": "ENG",
+                    },
+                )
+                self.response_302()
+
+            player = Player.objects.get(name="Joe Bloggs")
+
+            with self.subTest("Create parent", player=player):
+                self.post(
+                    "parent",
+                    player.pk,
+                    data={
+                        "name": "Alice Bloggs",
+                        "date_of_birth": "1978-06-14",
+                        "country_of_birth": "ENG",
+                    },
+                )
+                self.response_302()
+
+            parent = Parent.objects.get(name="Alice Bloggs")
+
+            for name, dob, born in [
+                ("Bob", "1948-03-19", "ENG"),
+                ("Mary", "1949-11-02", "WAL"),
+            ]:
+                with self.subTest(
+                    "Create grandparent", name=name, parent=parent, player=player
+                ):
+                    self.post(
+                        "grandparent",
+                        player.pk,
+                        parent.pk,
+                        data={
+                            "name": f"{name} Bloggs",
+                            "date_of_birth": dob,
+                            "country_of_birth": born,
+                        },
+                    )
+                    self.response_302()
+
+            self.get("players")
+            self.assertResponseContains(
+                "<small>Must have at least 2 biological parents.</small>"
+            )
+
+            # If we now allow this player to only have one parent, does that go away?
+            player.exceptions = "Does not know any details about his father."
+            player.min_biological_parents = 1
+            player.save()
+
+            self.get("players")
+            self.assertResponseContains(
+                '<span class="badge bg-danger">Declaration required</span>'
+            )
+
+    def test_player_with_unknown_grandparent(self):
+        with self.login(self.make_user()):
+            with self.subTest("Create a player entry"):
+                self.post(
+                    "player",
+                    data={
+                        "name": "Joe Bloggs",
+                        "date_of_birth": "2001-12-18",
+                        "country_of_birth": "ENG",
+                        "residence": "ENG",
+                    },
+                )
+                self.response_302()
+
+            player = Player.objects.get(name="Joe Bloggs")
+
+            for name, dob, born, parents in [
+                (
+                    "Bob Bloggs",
+                    "1948-03-19",
+                    "ENG",
+                    [
+                        ("Sarah Bloggs", "1921-07-03", "ENG"),
+                    ],
+                ),
+                (
+                    "Mary Bloggs",
+                    "1949-11-02",
+                    "WAL",
+                    [
+                        ("Jack Smith", "1927-06-30", "WAL"),
+                        ("Jane Smith", "1929-05-01", "WAL"),
+                    ],
+                ),
+            ]:
+                with self.subTest("Create parent", name=name, player=player):
+                    self.post(
+                        "parent",
+                        player.pk,
+                        data={
+                            "name": name,
+                            "date_of_birth": dob,
+                            "country_of_birth": born,
+                        },
+                    )
+                    self.response_302()
+
+                    parent = Parent.objects.get(name=name)
+
+                    for gp_name, gp_dob, gp_born in parents:
+                        with self.subTest(
+                            "Create grandparent",
+                            name=gp_name,
+                            parent=parent,
+                            player=player,
+                        ):
+                            self.post(
+                                "grandparent",
+                                player.pk,
+                                parent.pk,
+                                data={
+                                    "name": gp_name,
+                                    "date_of_birth": gp_dob,
+                                    "country_of_birth": gp_born,
+                                },
+                            )
+                            self.response_302()
+
+            res = self.get("players")
+            self.assertResponseContains(
+                "<small>At least one parent does not have at least 2 biological parents.</small>"
+            )
+
+            # If we now allow this parent to only have one parent, does that go away?
+            parent = Parent.objects.get(name="Bob Bloggs")
+            parent.exceptions = "Does not know any details about his father."
+            parent.min_biological_parents = 1
+            parent.save()
+
+            self.get("players")
+            self.assertResponseContains(
+                '<span class="badge bg-danger">Declaration required</span>'
+            )
+
 
 class UtilityTests(TestCase):
     def test_get_age_edge_cases(self):

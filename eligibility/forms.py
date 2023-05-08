@@ -19,7 +19,14 @@ from eligibility.utils import get_age
 class PlayerForm(forms.ModelForm):
     class Meta:
         model = Player
-        fields = "__all__"
+        fields = (
+            "name",
+            "date_of_birth",
+            "country_of_birth",
+            "country_of_birth_other",
+            "residence",
+            "residence_other",
+        )
 
 
 class ParentForm(ModelForm):
