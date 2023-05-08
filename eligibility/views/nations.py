@@ -48,7 +48,8 @@ def declaration_list(request):
         .distinct()
     )
 
-    paginator = Paginator(object_list, 50)
+    # TODO: improve performance of the above query
+    paginator = Paginator(object_list, 25)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
