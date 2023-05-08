@@ -47,11 +47,13 @@ class CountryAdmin(admin.ModelAdmin):
 @admin.register(GrandParent)
 class GrandParentAdmin(nested_admin.NestedModelAdmin):
     list_display = ("name", "country_of_birth", "child")
+    list_per_page = 25
 
 
 @admin.register(Parent)
 class ParentAdmin(nested_admin.NestedModelAdmin):
     list_display = ("name", "country_of_birth", "child")
+    list_per_page = 25
     inlines = [
         GrandParentInline,
     ]
@@ -60,6 +62,7 @@ class ParentAdmin(nested_admin.NestedModelAdmin):
 @admin.register(Player)
 class PlayerAdmin(GuardedModelAdminMixin, nested_admin.NestedModelAdmin):
     list_display = ("name", "date_of_birth", "country_of_birth", "eligible")
+    list_per_page = 25
     list_filter = (EligibilityListFilter, DecadeBornListFilter)
     inlines = [
         ParentInline,
@@ -70,6 +73,7 @@ class PlayerAdmin(GuardedModelAdminMixin, nested_admin.NestedModelAdmin):
 @admin.register(PlayerDeclaration)
 class PlayerDeclarationAdmin(GuardedModelAdmin):
     list_display = ("name", "author", "elected_country", "timestamp", "supersceded_by")
+    list_per_page = 25
     list_filter = (
         ElectedCountryListFilter,
         IsSuperscededListFilter.init("is_supersceded"),
