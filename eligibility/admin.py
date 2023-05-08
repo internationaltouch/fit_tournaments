@@ -62,7 +62,7 @@ class ParentAdmin(nested_admin.NestedModelAdmin):
 @admin.register(Player)
 class PlayerAdmin(GuardedModelAdminMixin, nested_admin.NestedModelAdmin):
     list_display = ("name", "date_of_birth", "country_of_birth", "eligible")
-    list_per_page = 25
+    list_per_page = 10
     list_filter = (EligibilityListFilter, DecadeBornListFilter)
     inlines = [
         ParentInline,
