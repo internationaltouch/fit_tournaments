@@ -58,6 +58,10 @@
             {% url "impersonate-list" as list_url %}
             {% bootstrap_button "Impersonate" button_type="link" href=list_url size="small" button_class="btn-warning" %}
         {% endif %}
+        {% if user.is_superuser %}
+            {% url "accreditation" as accreditation_url %}
+            {% bootstrap_button "Accreditation" button_type="link" href=accreditation_url size="small" button_class="btn-warning" %}
+        {% endif %}
     </div>
 </footer>
 

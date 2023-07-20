@@ -13,7 +13,13 @@
             <tr>
                 <th>
                 {{ each|type|title }}</td>
-                <td>{{ each.name }}</td>
+                <td>
+                    {{ each.name }}
+                    <span class="badge bg-primary">{{ each.country_of_birth|default_if_none:each.country_of_birth_other }}</span>
+                    {% if each|type == "player" %}
+                        <span class="badge bg-success">{{ each.residence|default_if_none:each.residence_other }}</span>
+                    {% endif %}
+                </td>
                 <td class="p-0">
                     {% with dirty=each|dirty %}
                         {% if dirty %}
