@@ -15,10 +15,17 @@ class PlayerDeclarationForm(ModelForm):
     class Meta:
         model = PlayerDeclaration
         fields = ["verified_comments"]
+        labels = {"verified_comments": "Verifier Comments"}
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance.verified_by = user
+        self.fields["verified_comments"].widget.attrs["placeholder"] = "Comments"
+        self.fields["approve"] = forms.BooleanField(
+            label="",
+            required=True,
+            help_text="You must tick this box to verify the declaration.",
+        )
 
     def save(self, commit=True):
         """

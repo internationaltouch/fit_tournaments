@@ -219,7 +219,11 @@ class PlayerDeclaration(models.Model):
         null=True,
         on_delete=models.PROTECT,
     )
-    verified_comments = models.TextField(blank=True, null=True)
+    verified_comments = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Brief details of what was sighted during the verification process.",
+    )
 
     objects = PlayerDeclarationManager()
 

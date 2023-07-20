@@ -9,6 +9,7 @@ from eligibility.filters import (
     EligibilityListFilter,
     IsSuperscededListFilter,
 )
+from eligibility.forms import PlayerDeclarationAdminForm
 from eligibility.models import (
     Country,
     Event,
@@ -72,6 +73,7 @@ class PlayerAdmin(GuardedModelAdminMixin, nested_admin.NestedModelAdmin):
 
 @admin.register(PlayerDeclaration)
 class PlayerDeclarationAdmin(GuardedModelAdmin):
+    form_class = PlayerDeclarationAdminForm
     list_display = ("name", "author", "elected_country", "timestamp", "supersceded_by")
     list_per_page = 25
     list_filter = (
@@ -79,16 +81,7 @@ class PlayerDeclarationAdmin(GuardedModelAdmin):
         IsSuperscededListFilter.init("is_supersceded"),
         ("player", RelatedDropdownFilter),
         ("author", RelatedDropdownFilter),
-    )
-    fields = (
-        "player",
-        "name",
-        "author",
-        "eligible_for",
-        "elected_country",
-        "supersceded_by",
-        "data",
-        "evidence_nation",
+        ("verified_by", RelatedDropdownFilter),
     )
     readonly_fields = (
         "name",
