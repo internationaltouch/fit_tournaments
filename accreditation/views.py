@@ -3,7 +3,8 @@ from django.urls import reverse_lazy
 from django.views.generic import UpdateView
 from search_views.search import SearchListView
 
-from accreditation.forms import PlayerDeclarationForm
+from accreditation.forms import PlayerDeclarationForm, PlayerDeclarationSearchForm
+from accreditation.filters import PlayerDeclarationFilter
 from eligibility.models import PlayerDeclaration
 
 
