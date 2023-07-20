@@ -10,6 +10,7 @@ django-modelforms
 django-more-admin-filters
 django-nested-admin
 django-querycount
+django-search-views
 django-sslserver
 gunicorn
 pip-tools

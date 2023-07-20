@@ -213,6 +213,13 @@ class PlayerDeclaration(models.Model):
         null=True,
         on_delete=models.CASCADE,
     )
+    verified_by = models.ForeignKey(
+        get_user_model(),
+        blank=True,
+        null=True,
+        on_delete=models.PROTECT,
+    )
+    verified_comments = models.TextField(blank=True, null=True)
 
     objects = PlayerDeclarationManager()
 

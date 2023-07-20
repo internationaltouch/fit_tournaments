@@ -1,0 +1,56 @@
+{% load bootstrap5 eligibility_tags %}
+
+<table class="table table-striped mb-0">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col">Submission</th>
+            <th scope="col">Changes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for each in object.data %}
+            <tr>
+                <th>
+                {{ each|type|title }}</td>
+                <td>{{ each.name }}</td>
+                <td class="p-0">
+                    {% with dirty=each|dirty %}
+                        {% if dirty %}
+                            <table class="table mb-0 table-fixed">
+                                {% for key, value in dirty.items %}
+                                    <tr>
+                                        <th class="col-4 col-xs-4">{{ each|fieldname:key|capfirst }}</td>
+                                        <td class="col-4 col-xs-4 text-danger">{{ value.current|default_if_none:"-" }}</td>
+                                        <td class="col-4 col-xs-4 text-success">{{ value.saved|default_if_none:"-" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+        {% endfor %}
+        {% for each in object.newly_added_ancestors %}
+            <tr>
+                <th>{{ each|type|title }}</th>
+                <td>-</td>
+                <td class="p-0">
+                    {% with dirty=each|model_to_dict:"child" %}
+                        <table class="table mb-0 table-fixed">
+                            {% for key, value in dirty.items %}
+                                {% if value is not None %}
+                                    <tr>
+                                        <th class="col-4 col-xs-4">{{ each|fieldname:key|capfirst }}</th>
+                                        <td class="col-4 col-xs-4 text-danger">-</td>
+                                        <td class="col-4 col-xs-4 text-success">{{ value|default_if_none:"-" }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </table>
+                    {% endwith %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

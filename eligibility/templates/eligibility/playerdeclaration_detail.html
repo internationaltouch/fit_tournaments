@@ -6,108 +6,12 @@
         <div class="card mb-3">
             <h4 class="card-header text-center">Player Declaration</h4>
             <div class="card-body">
-                <p>Based on the data supplied at the time, the following declaration was collected.</p>
-
-                <div class="mb-3 row">
-                    <h5 class="col-md-3 col-form-label">Name</h5>
-                    <div class="col-md-9">
-                        {{ object.name }}
-                        <div class="form-text">The name of the player this declaration is made for.</div>
-                    </div>
-                </div>
-
-                <div class="mb-3 row">
-                    <h5 class="col-md-3 col-form-label">Submitted by</h5>
-                    <div class="col-md-9">
-                        {{ object.author.get_full_name }} &mdash; {{ object.author.email|urlize }}
-                        <div class="form-text">The user of the system who made the declaration.</div>
-                    </div>
-                </div>
-
-                <div class="mb-3 row">
-                    <h5 class="col-md-3 col-form-label">Date</h5>
-                    <div class="col-md-9">
-                        {{ object.timestamp }}
-                        <div class="form-text">The date and time that the declaration was made.</div>
-                    </div>
-                </div>
-
-                <div class="mb-3 row">
-                    <h5 class="col-md-3 col-form-label">Eligible for</h5>
-                    <div class="col-md-9">
-                        {% for each in object.eligible_for|diff:object.now_eligible_for %}{% if forloop.last %}and {% endif %}<span class="{{ each.state|yesno:"text-success,text-danger," }}">{{ each.value }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}
-                        <div class="form-text">
-                            The countries that the player is eligible for, based on their declaration.
-                            Any changes made since the declaration are colour coded.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-3 row">
-                    <h5 class="col-md-3 col-form-label">Elected country</h5>
-                    <div class="col-md-9">
-                        {{ object.elected_country }}
-                        <div class="form-text">The country that the player has chosen to represent in this declaration.</div>
-                    </div>
-                </div>
-
+                {% include "eligibility/playerdeclaration_detail_top.html" %}
                 <h5 class="card-title">Ancestry</h5>
             </div>
 
-            <table class="table table-striped mb-0">
-                <thead>
-                    <tr>
-                        <th scope="col"></th>
-                        <th scope="col">Submission</th>
-                        <th scope="col">Changes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for each in object.data %}
-                        <tr>
-                            <th>
-                            {{ each|type|title }}</td>
-                            <td>{{ each.name }}</td>
-                            <td class="p-0">
-                                {% with dirty=each|dirty %}
-                                    {% if dirty %}
-                                        <table class="table mb-0 table-fixed">
-                                            {% for key, value in dirty.items %}
-                                                <tr>
-                                                    <th class="col-4 col-xs-4">{{ each|fieldname:key|capfirst }}</td>
-                                                    <td class="col-4 col-xs-4 text-danger">{{ value.current|default_if_none:"-" }}</td>
-                                                    <td class="col-4 col-xs-4 text-success">{{ value.saved|default_if_none:"-" }}</td>
-                                                </tr>
-                                            {% endfor %}
-                                        </table>
-                                    {% endif %}
-                                {% endwith %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    {% for each in object.newly_added_ancestors %}
-                        <tr>
-                            <th>{{ each|type|title }}</th>
-                            <td>-</td>
-                            <td class="p-0">
-                                {% with dirty=each|model_to_dict:"child" %}
-                                    <table class="table mb-0 table-fixed">
-                                        {% for key, value in dirty.items %}
-                                            {% if value is not None %}
-                                                <tr>
-                                                    <th class="col-4 col-xs-4">{{ each|fieldname:key|capfirst }}</th>
-                                                    <td class="col-4 col-xs-4 text-danger">-</td>
-                                                    <td class="col-4 col-xs-4 text-success">{{ value|default_if_none:"-" }}</td>
-                                                </tr>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </table>
-                                {% endwith %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% include "eligibility/playerdeclaration_detail_ancestry.html" %}
+
             <div class="card-footer">
                 {% url 'players' as players_url %}
                 {% bootstrap_button "Players" button_type="link" href=players_url %}

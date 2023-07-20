@@ -1,0 +1,40 @@
+{% extends "simple.html" %}
+{% load bootstrap5 %}
+
+{% block card_title %}Player Declaration Search{% endblock %}
+
+{% block card_body %}
+    <form class="mb-3" action="" method="GET">
+        {{ redirect_field }}
+
+        {% bootstrap_form form layout='horizontal' %}
+
+        {% bootstrap_button "Search" %}
+    </form>
+
+    {% if page_obj.object_list %}
+        <ul class="list-group mb-3">
+            {% for declaration in page_obj.object_list %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        {% if declaration.is_supersceded %}
+                            {{ declaration }}
+                        {% else %}
+                            <a href="{% url 'verify' declaration.pk %}">{{ declaration }}</a>
+                        {% endif %}
+                        {% if declaration.verified_by %}
+                            <span class="badge bg-warning">Verified by {{ declaration.verified_by.get_full_name }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-{{ declaration.is_supersceded|yesno:"danger,success" }}">{{ declaration.is_supersceded|yesno:"Superseded,Active" }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+        {% with request.path|add:"?"|add:request.GET.urlencode as result_url %}
+            {% bootstrap_pagination page_obj url=result_url size="small" %}
+        {% endwith %}
+    {% elif query %}
+        {% bootstrap_alert "There are no users that you can impersonate." alert_type="danger" %}
+    {% endif %}
+{% endblock card_body %}
+

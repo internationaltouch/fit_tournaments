@@ -1,0 +1,46 @@
+{% load bootstrap5 eligibility_tags %}
+
+<p>Based on the data supplied at the time, the following declaration was collected.</p>
+
+<div class="mb-3 row">
+    <h5 class="col-md-3 col-form-label">Name</h5>
+    <div class="col-md-9">
+        {{ object.name }}
+        <div class="form-text">The name of the player this declaration is made for.</div>
+    </div>
+</div>
+
+<div class="mb-3 row">
+    <h5 class="col-md-3 col-form-label">Submitted by</h5>
+    <div class="col-md-9">
+        {{ object.author.get_full_name }} &mdash; {{ object.author.email|urlize }}
+        <div class="form-text">The user of the system who made the declaration.</div>
+    </div>
+</div>
+
+<div class="mb-3 row">
+    <h5 class="col-md-3 col-form-label">Date</h5>
+    <div class="col-md-9">
+        {{ object.timestamp }}
+        <div class="form-text">The date and time that the declaration was made.</div>
+    </div>
+</div>
+
+<div class="mb-3 row">
+    <h5 class="col-md-3 col-form-label">Eligible for</h5>
+    <div class="col-md-9">
+        {% for each in object.eligible_for|diff:object.now_eligible_for %}{% if forloop.last %}and {% endif %}<span class="{{ each.state|yesno:"text-success,text-danger," }}">{{ each.value }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}
+        <div class="form-text">
+            The countries that the player is eligible for, based on their declaration.
+            Any changes made since the declaration are colour coded.
+        </div>
+    </div>
+</div>
+
+<div class="mb-3 row">
+    <h5 class="col-md-3 col-form-label">Elected country</h5>
+    <div class="col-md-9">
+        {{ object.elected_country }}
+        <div class="form-text">The country that the player has chosen to represent in this declaration.</div>
+    </div>
+</div>
