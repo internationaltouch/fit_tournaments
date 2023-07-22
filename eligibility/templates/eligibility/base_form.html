@@ -8,7 +8,7 @@
             <h4 class="card-header text-center">{% block card_title %}{% endblock %}</h4>
             <div class="card-body">
                 {% block before_form %}{% endblock %}
-                {% bootstrap_form form layout='horizontal' %}
+                {% block form %}{% bootstrap_form form layout='horizontal' %}{% endblock %}
                 {% block after_form %}{% endblock %}
             </div>
             {% block after_body %}{% endblock %}

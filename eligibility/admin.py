@@ -12,6 +12,7 @@ from eligibility.filters import (
 from eligibility.forms import PlayerDeclarationAdminForm
 from eligibility.models import (
     Country,
+    DeclarationExceptionRequest,
     Event,
     GrandParent,
     NationalSquad,
@@ -69,6 +70,12 @@ class PlayerAdmin(GuardedModelAdminMixin, nested_admin.NestedModelAdmin):
         ParentInline,
         PlayerDeclarationInline,
     ]
+
+
+@admin.register(DeclarationExceptionRequest)
+class DeclarationExceptionRequestAdmin(GuardedModelAdmin):
+    list_display = ("pk", "player")
+    list_per_page = 25
 
 
 @admin.register(PlayerDeclaration)

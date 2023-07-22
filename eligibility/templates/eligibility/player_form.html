@@ -1,4 +1,19 @@
 {% extends "eligibility/base_form.html" %}
-{% load bootstrap5 %}
+{% load bootstrap5 eligibility_tags %}
 
 {% block card_title %}{{ object.pk|yesno:"Update,Create" }} Player{% endblock %}
+
+{% block after_body %}
+    {% if object.declarationexceptionrequest_set.exists %}
+        <div class="card-body">
+            <h5 class="card-title">{{ object.declarationexceptionrequest_set.all|type|capfirst }}{{ object.declarationexceptionrequest_set.all|pluralize }}</h5>
+            <ul class="list-group">
+                {% for exception in object.declarationexceptionrequest_set.all %}
+                    <li class="list-group-item">
+                        {{ exception.reason|linebreaksbr }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}

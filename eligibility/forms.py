@@ -6,6 +6,7 @@ from guardian.shortcuts import get_objects_for_user
 from modelforms.forms import ModelForm
 
 from eligibility.models import (
+    DeclarationExceptionRequest,
     GrandParent,
     NationalSquad,
     NationalTeam,
@@ -51,6 +52,15 @@ class GrandParentForm(ModelForm):
             "country_of_birth_other",
             "adopted",
         )
+
+
+class DeclarationExceptionRequestForm(ModelForm):
+    class Meta:
+        model = DeclarationExceptionRequest
+        fields = ("reason",)
+        labels = {
+            "reason": "Please provide an explanation as to why you cannot complete the declaration in the form."
+        }
 
 
 class PlayerDeclarationAdminForm(ModelForm):

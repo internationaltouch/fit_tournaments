@@ -6,6 +6,7 @@ from eligibility.views import nations, players
 player_urls = [
     path("create", players.player_create, name="player"),
     path("<uuid:pk>", players.player_edit, name="player"),
+    path("<uuid:pk>/exception", players.player_exception_request, name="exception"),
     path("<uuid:player>/declarations/create", players.declaration_create, name="declaration"),
     path("<uuid:player>/declarations/<uuid:pk>", players.PlayerDeclarationView.as_view(), name="declaration"),
     path("<uuid:player>/parents/create", players.parent_edit, name="parent"),

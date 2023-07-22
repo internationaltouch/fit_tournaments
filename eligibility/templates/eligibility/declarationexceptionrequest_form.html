@@ -1,0 +1,20 @@
+{% extends "eligibility/base_form.html" %}
+{% load bootstrap5 eligibility_tags %}
+
+{% block card_title %}Exception Request{% endblock %}
+
+{% block before_form %}
+    <h5 class="card-title">{{ object|type|capfirst }} for {{ player }}</h5>
+
+    <div class="alert alert-info" role="alert">
+        <p>When a player is cannot complete their declaration because they are <strong>unable</strong>
+            to provide all the requested details, they may <em>request</em> an exception from FIT to
+            relax the constraints of this system, allowing them to proceed.</p>
+        <p class="mb-0">FIT will review each request and if the reasons are accepted, can adjust the
+            parameters of the declaration process.</p>
+    </div>
+{% endblock %}
+
+{% block form %}
+{% bootstrap_form form %}
+{% endblock %}

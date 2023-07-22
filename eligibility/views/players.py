@@ -12,12 +12,19 @@ from guardian.decorators import permission_required
 from guardian.shortcuts import assign_perm, get_objects_for_user
 
 from eligibility.forms import (
+    DeclarationExceptionRequestForm,
     GrandParentForm,
     ParentForm,
     PlayerDeclarationForm,
     PlayerForm,
 )
-from eligibility.models import GrandParent, Parent, Player, PlayerDeclaration
+from eligibility.models import (
+    DeclarationExceptionRequest,
+    GrandParent,
+    Parent,
+    Player,
+    PlayerDeclaration,
+)
 
 
 @login_required
@@ -101,6 +108,42 @@ def player_edit(request, pk):
     except ValueError as exc:
         context["declaration"] = str(exc)
     return TemplateResponse(request, "eligibility/player_form_detail.html", context)
+
+
+@permission_required("eligibility.change_player", (Player, "pk", "pk"))
+def player_exception_request(request, pk):
+    player = get_object_or_404(Player, pk=pk)
+    instance = DeclarationExceptionRequest(player=player)
+    if request.method == "POST":
+        form = DeclarationExceptionRequestForm(data=request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse("player", kwargs={"pk": pk}))
+    else:
+        form = DeclarationExceptionRequestForm(instance=instance)
+    context = {
+        "object": instance,
+        "player": player,
+        "form": form,
+        "cancel_url": player.get_absolute_url(),
+    }
+    return TemplateResponse(
+        request, "eligibility/declarationexceptionrequest_form.html", context
+    )
+
+
+@permission_required("eligibility.change_player", (Player, "pk", "pk"))
+def player_exception_view(request, pk, exception):
+    player = get_object_or_404(Player, pk=pk)
+    instance = get_object_or_404(
+        DeclarationExceptionRequest, pk=exception, player=player
+    )
+    context = {
+        "object": instance,
+    }
+    return TemplateResponse(
+        request, "eligibility/declarationexceptionrequest_detail.html", context
+    )
 
 
 @permission_required("eligibility.change_player", (Player, "pk", "player"))

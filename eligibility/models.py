@@ -262,6 +262,20 @@ class PlayerDeclaration(models.Model):
         person_declaration_clean(self)
 
 
+class DeclarationExceptionRequest(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    reason = models.TextField(
+        help_text=(
+            "Reason for the exception request. "
+            "Provide explanation for why you are unable to meet the minimum requirements."
+        )
+    )
+
+    def __str__(self):
+        return f"{self.uuid} - {self.player}"
+
+
 class Event(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     name = models.CharField(max_length=256)
